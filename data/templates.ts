@@ -11,10 +11,10 @@ export const templates: Template[] = [
     textColor: '#1a1a1a',
   },
   {
-    id: 'couplet-dark',
-    name: '深色洒金',
+    id: 'couplet-red',
+    name: '红底金字',
     categoryId: 'couplet',
-    bgColor: '#2a2520',
+    bgColor: '#b8312f',
     borderStyle: 'double',
     textColor: '#d4af37',
   },

@@ -90,34 +90,32 @@ export async function composeArtwork(
 /**
  * 根据位置数组中的绝对索引 positionIdx，计算 characters 数组中的索引
  *
- * positions 数组的顺序: [upper..., lower..., banner...]
- * characters 数组的顺序: [banner?, upper..., lower...]
+ * positions 数组的顺序: [upper(0..upperCount-1), lower(upperCount..upperCount+lowerCount-1), banner(...)]
+ * characters 数组的顺序: [banner?(0..bannerCount-1), upper(bannerCount..bannerCount+upperCount-1), lower(...)]
  */
 function getCharIndexByPosition(
   pos: { positionType: 'upper' | 'lower' | 'banner' | 'single' },
   coupletInfo: ReturnType<typeof getCoupletInfo>,
   positionIdx: number
 ): number {
-  const info = coupletInfo;
-
-  if (!info) {
-    // 非春联：一一对应
+  if (!coupletInfo) {
     return positionIdx;
   }
 
-  const { bannerCount, upperCount, lowerCount } = info;
+  const { bannerCount, upperCount, lowerCount } = coupletInfo;
 
-  if (pos.positionType === 'banner') {
-    // banner 在 characters 数组最前面
-    return positionIdx - upperCount - lowerCount;
-  }
   if (pos.positionType === 'upper') {
-    // 上联: characters[bannerCount + 组内偏移]
+    // positionIdx 是 0..upperCount-1，characters 中 upper 从 bannerCount 开始
     return bannerCount + positionIdx;
   }
   if (pos.positionType === 'lower') {
-    // 下联: characters[bannerCount + upperCount + 组内偏移]
+    // positionIdx 是 upperCount..upperCount+lowerCount-1
+    // 组内偏移 = positionIdx - upperCount
     return bannerCount + upperCount + (positionIdx - upperCount);
+  }
+  if (pos.positionType === 'banner') {
+    // positionIdx 是 upperCount+lowerCount 之后
+    return positionIdx - upperCount - lowerCount;
   }
   return positionIdx;
 }
