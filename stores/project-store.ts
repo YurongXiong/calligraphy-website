@@ -32,15 +32,15 @@ export const useProjectStore = create<ProjectStore>()(
 
         if (categoryId === 'couplet' && typeof text === 'object') {
           const couplet = text as CoupletText;
-          // 横批、上联、下联分别作为一个字符串，整体作为 charArray 的一个元素
-          if (couplet.banner) charArray.push(couplet.banner);
+          // 每个字都作为独立元素：横批 → 上联 → 下联
+          if (couplet.banner) charArray.push(...couplet.banner.split(''));
           charArray.push(...couplet.upper.split(''));
           charArray.push(...couplet.lower.split(''));
         } else if (typeof text === 'string') {
           charArray = text.split('');
         }
 
-        const characters: CharacterStrokes[] = charArray.map((char, idx) => ({
+        const characters: CharacterStrokes[] = charArray.map((char) => ({
           charId: generateId(),
           character: char,
           strokes: [],
