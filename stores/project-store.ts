@@ -32,13 +32,18 @@ export const useProjectStore = create<ProjectStore>()(
 
         if (categoryId === 'couplet' && typeof text === 'object') {
           const couplet = text as CoupletText;
+          console.log('[setText] IS couplet path', { couplet, upperLen: couplet.upper.length, lowerLen: couplet.lower.length, banner: couplet.banner });
           charArray = [...couplet.upper, ...couplet.lower];
           if (couplet.banner) {
             charArray = [couplet.banner, ...charArray];
           }
         } else if (typeof text === 'string') {
+          console.log('[setText] STRING path, text:', text, 'len:', text.length);
           charArray = text.split('');
+        } else {
+          console.log('[setText] NEITHER, typeof text:', typeof text, 'text:', text);
         }
+        console.log('[setText] categoryId:', categoryId, 'charArray:', charArray.join(''));
 
         const characters: CharacterStrokes[] = charArray.map((char, idx) => ({
           charId: generateId(),
