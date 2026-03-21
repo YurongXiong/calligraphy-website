@@ -86,21 +86,22 @@ export function calculateCoupletLayout(
     });
   }
 
-  // 横批 - 顶部居中，字横排（从左到右）
+  // 横批 - 顶部，字横排（从左到右）
+  // 字号与上联/下联保持一致
   if (bannerCount > 0) {
-    const bannerMarginTop = 40;
-    const bannerAreaHeight = verticalMarginTop - bannerMarginTop - 20;
-    // 横批每个字是方形的
-    const bannerCharSize = Math.min(bannerAreaHeight, usableWidth * 0.4 / bannerCount);
-    const bannerTotalWidth = bannerCharSize * bannerCount;
+    const bannerCharHeight = Math.max(upperCharHeight, lowerCharHeight); // 和上下联字号一致
+    const bannerCharWidth = bannerCharHeight; // 方形字格
+    const bannerTotalWidth = bannerCharWidth * bannerCount;
+    // 横批在顶部区域垂直居中
     const bannerStartX = (contentWidth - bannerTotalWidth) / 2;
+    const bannerStartY = (verticalMarginTop - bannerCharHeight) / 2;
 
     for (let i = 0; i < bannerCount; i++) {
       positions.push({
-        x: bannerStartX + i * bannerCharSize,
-        y: bannerMarginTop,
-        width: bannerCharSize,
-        height: bannerCharSize,
+        x: bannerStartX + i * bannerCharWidth,
+        y: bannerStartY,
+        width: bannerCharWidth,
+        height: bannerCharHeight,
         rotation: 0,
         positionType: 'banner',
       });
