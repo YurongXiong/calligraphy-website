@@ -8,11 +8,18 @@ export function calculateLayout(
   categoryId: CategoryId,
   charCount: number,
   contentWidth: number,
-  contentHeight: number
+  contentHeight: number,
+  coupletInfo?: { upperCount: number; lowerCount: number; bannerCount: number }
 ): CharPosition[] {
   switch (categoryId) {
     case 'couplet':
-      return calculateCoupletLayout(charCount, contentWidth, contentHeight);
+      return calculateCoupletLayout(
+        coupletInfo?.upperCount ?? charCount,
+        coupletInfo?.lowerCount ?? charCount,
+        coupletInfo?.bannerCount ?? 0,
+        contentWidth,
+        contentHeight
+      );
     case 'hanging':
       return calculateHangingLayout(charCount, contentWidth, contentHeight);
     case 'plaque':
@@ -23,42 +30,83 @@ export function calculateLayout(
 }
 
 /**
- * 春联布局：
+ * 春联布局完整实现
+ * - 横批：顶部居中横排
  * - 上联：右侧竖排（字从上到下）
  * - 下联：左侧竖排（字从上到下）
- * - 横批：顶部居中横排
  *
- * 注意：这里的 charCount 不包括横批
+ * @param upperCount 上联字数
+ * @param lowerCount 下联字数
+ * @param bannerCount 横批字数（0 或具体字数）
+ * @param contentWidth 内容区域宽度
+ * @param contentHeight 内容区域高度
  */
-function calculateCoupletLayout(
-  charCount: number,
+export function calculateCoupletLayout(
+  upperCount: number,
+  lowerCount: number,
+  bannerCount: number,
   contentWidth: number,
   contentHeight: number
 ): CharPosition[] {
   const positions: CharPosition[] = [];
-  const marginX = 80;
-  const marginY = 120;
-  const usableWidth = contentWidth - marginX * 2;
-  const usableHeight = contentHeight - marginY * 2;
 
-  // 上下联各占一半宽度
-  const columnWidth = (usableWidth - 80) / 2;
-  const charHeight = usableHeight / charCount;
+  // 竖排部分：左右两列
+  const verticalMarginX = 80;
+  const verticalMarginTop = 160; // 横批区域占用的顶部空间
+  const verticalMarginBottom = 80;
+  const columnGap = 80; // 左右列之间的间距
 
-  // 上联 - 右侧，字竖排
-  for (let i = 0; i < charCount; i++) {
+  const usableWidth = contentWidth - verticalMarginX * 2;
+  const usableHeight = contentHeight - verticalMarginTop - verticalMarginBottom;
+  const columnWidth = (usableWidth - columnGap) / 2;
+
+  // 上联 - 右侧，字竖排（从上到下）
+  const upperCharHeight = usableHeight / Math.max(upperCount, 1);
+  for (let i = 0; i < upperCount; i++) {
     positions.push({
-      x: marginX + columnWidth + 80, // 右边开始
-      y: marginY + i * charHeight,
+      x: verticalMarginX + columnWidth + columnGap,
+      y: verticalMarginTop + i * upperCharHeight,
       width: columnWidth,
-      height: charHeight,
+      height: upperCharHeight,
       rotation: 0,
+      positionType: 'upper',
     });
   }
 
-  // 下联 - 左侧竖排（如果需要上下联同时显示，这里只返回上联；
-  // 实际春联有上下联+横批，需要更多字数）
-  // MVP 简化：这里只处理上联
+  // 下联 - 左侧，字竖排（从上到下）
+  const lowerCharHeight = usableHeight / Math.max(lowerCount, 1);
+  for (let i = 0; i < lowerCount; i++) {
+    positions.push({
+      x: verticalMarginX,
+      y: verticalMarginTop + i * lowerCharHeight,
+      width: columnWidth,
+      height: lowerCharHeight,
+      rotation: 0,
+      positionType: 'lower',
+    });
+  }
+
+  // 横批 - 顶部居中，字横排（从左到右）
+  if (bannerCount > 0) {
+    const bannerMarginTop = 40;
+    const bannerAreaHeight = verticalMarginTop - bannerMarginTop - 20;
+    // 横批每个字是方形的
+    const bannerCharSize = Math.min(bannerAreaHeight, usableWidth * 0.4 / bannerCount);
+    const bannerTotalWidth = bannerCharSize * bannerCount;
+    const bannerStartX = (contentWidth - bannerTotalWidth) / 2;
+
+    for (let i = 0; i < bannerCount; i++) {
+      positions.push({
+        x: bannerStartX + i * bannerCharSize,
+        y: bannerMarginTop,
+        width: bannerCharSize,
+        height: bannerCharSize,
+        rotation: 0,
+        positionType: 'banner',
+      });
+    }
+  }
+
   return positions;
 }
 
@@ -89,6 +137,7 @@ function calculateHangingLayout(
       width: charSize,
       height: charSize,
       rotation: 0,
+      positionType: 'single',
     });
   }
 
@@ -124,6 +173,7 @@ function calculatePlaqueLayout(
       width: charWidth,
       height: charHeight,
       rotation: 0,
+      positionType: 'single',
     });
   }
 

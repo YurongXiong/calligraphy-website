@@ -1,4 +1,4 @@
-import type { CharacterStrokes, CategoryId, BrushStyle, Template } from '../../types';
+import type { CharacterStrokes, CategoryId, BrushStyle, Template, CoupletText } from '../../types';
 import { calculateLayout, getCanvasSize } from './layout-engine';
 import { renderCharacter } from '../beautify';
 
@@ -7,12 +7,19 @@ const STROKE_CANVAS_SIZE = 400;
 
 /**
  * 合成作品主函数
+ *
+ * @param characters 书写过的所有字的笔画数据
+ * @param categoryId 作品类型
+ * @param template 模板配置
+ * @param style 笔触风格
+ * @param text 完整的文本内容（春联需要区分上联/下联/横批）
  */
 export async function composeArtwork(
   characters: CharacterStrokes[],
   categoryId: CategoryId,
   template: Template,
-  style: BrushStyle
+  style: BrushStyle,
+  text?: string | CoupletText
 ): Promise<HTMLCanvasElement> {
   const { width, height } = getCanvasSize(categoryId);
 
@@ -31,28 +38,38 @@ export async function composeArtwork(
   // 获取内容区域（边框内）
   const contentArea = getContentArea(width, height);
 
-  // 计算布局
-  const charCount = characters.length;
-  const positions = calculateLayout(categoryId, charCount, contentArea.width, contentArea.height);
+  // 计算春联的分组信息
+  const coupletInfo = getCoupletInfo(categoryId, characters.length, text);
 
-  // 渲染每个字
-  for (let i = 0; i < characters.length; i++) {
-    const char = characters[i];
+  // 计算布局
+  const positions = calculateLayout(
+    categoryId,
+    characters.length,
+    contentArea.width,
+    contentArea.height,
+    coupletInfo
+  );
+
+  // 按 positionType 渲染每个字
+  for (let i = 0; i < positions.length; i++) {
     const pos = positions[i];
-    if (!pos) continue;
+    // 获取对应的字在 characters 数组中的索引
+    const charIndex = getCharIndexByPosition(pos, coupletInfo, i);
+    if (charIndex < 0 || charIndex >= characters.length) continue;
+
+    const char = characters[charIndex];
+    if (!char.strokes.length) continue; // 跳过未书写的字
 
     // 字在内容区域中的位置
     const absX = contentArea.x + pos.x;
     const absY = contentArea.y + pos.y;
 
-    // 计算缩放：将笔画从书写画布缩放到目标字格
-    // 笔画在 STROKE_CANVAS_SIZE × STROKE_CANVAS_SIZE 画布上
-    // 目标字格是 pos.width × pos.height
+    // 计算缩放
     const scaleX = pos.width / STROKE_CANVAS_SIZE;
     const scaleY = pos.height / STROKE_CANVAS_SIZE;
-    const scale = Math.min(scaleX, scaleY); // 保持比例
+    const scale = Math.min(scaleX, scaleY);
 
-    // 居中偏移：如果字格和笔画比例不同，需要居中
+    // 居中偏移
     const scaledStrokeWidth = STROKE_CANVAS_SIZE * scale;
     const scaledStrokeHeight = STROKE_CANVAS_SIZE * scale;
     const offsetInCellX = (pos.width - scaledStrokeWidth) / 2;
@@ -61,22 +78,70 @@ export async function composeArtwork(
     const finalX = absX + offsetInCellX;
     const finalY = absY + offsetInCellY;
 
-    // 渲染（无旋转，直接画），使用模板指定的墨色
-    renderCharacter(
-      ctx,
-      char.strokes,
-      style,
-      finalX,
-      finalY,
-      scale,
-      template.textColor
-    );
+    renderCharacter(ctx, char.strokes, style, finalX, finalY, scale, template.textColor);
   }
 
   // 绘制水印
   drawWatermark(ctx, width, height);
 
   return canvas;
+}
+
+/**
+ * 根据位置数组中的绝对索引 positionIdx，计算 characters 数组中的索引
+ *
+ * positions 数组的顺序: [upper..., lower..., banner...]
+ * characters 数组的顺序: [banner?, upper..., lower...]
+ */
+function getCharIndexByPosition(
+  pos: { positionType: 'upper' | 'lower' | 'banner' | 'single' },
+  coupletInfo: ReturnType<typeof getCoupletInfo>,
+  positionIdx: number
+): number {
+  const info = coupletInfo;
+
+  if (!info) {
+    // 非春联：一一对应
+    return positionIdx;
+  }
+
+  const { bannerCount, upperCount, lowerCount } = info;
+
+  if (pos.positionType === 'banner') {
+    // banner 在 characters 数组最前面
+    return positionIdx - upperCount - lowerCount;
+  }
+  if (pos.positionType === 'upper') {
+    // 上联: characters[bannerCount + 组内偏移]
+    return bannerCount + positionIdx;
+  }
+  if (pos.positionType === 'lower') {
+    // 下联: characters[bannerCount + upperCount + 组内偏移]
+    return bannerCount + upperCount + (positionIdx - upperCount);
+  }
+  return positionIdx;
+}
+
+/**
+ * 从文本内容中提取春联的分组信息
+ */
+function getCoupletInfo(
+  categoryId: CategoryId,
+  totalChars: number,
+  text?: string | CoupletText
+): { upperCount: number; lowerCount: number; bannerCount: number } | undefined {
+  if (categoryId !== 'couplet' || !text) return undefined;
+
+  if (typeof text === 'object' && 'upper' in text) {
+    return {
+      upperCount: text.upper.length,
+      lowerCount: text.lower.length,
+      bannerCount: text.banner?.length ?? 0,
+    };
+  }
+
+  // 无法解析，回退
+  return undefined;
 }
 
 /**
@@ -145,12 +210,13 @@ export async function composePreview(
   categoryId: CategoryId,
   template: Template,
   style: BrushStyle,
-  previewWidth: number = 400
+  previewWidth: number = 400,
+  text?: string | CoupletText
 ): Promise<HTMLCanvasElement> {
   const { width, height } = getCanvasSize(categoryId);
   const scale = previewWidth / width;
 
-  const fullCanvas = await composeArtwork(characters, categoryId, template, style);
+  const fullCanvas = await composeArtwork(characters, categoryId, template, style, text);
 
   // 缩放到预览尺寸
   const previewCanvas = document.createElement('canvas');

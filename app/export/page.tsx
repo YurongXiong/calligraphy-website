@@ -16,6 +16,7 @@ export default function ExportPage() {
   const categoryId = useProjectStore((state) => state.categoryId);
   const templateId = useProjectStore((state) => state.templateId);
   const styleId = useProjectStore((state) => state.styleId);
+  const text = useProjectStore((state) => state.text);
 
   const [format, setFormat] = useState<'png' | 'jpg'>('png');
   const [artworkCanvas, setArtworkCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -41,7 +42,8 @@ export default function ExportPage() {
           characters,
           categoryId as CategoryId,
           selectedTemplate,
-          brushStyle
+          brushStyle,
+          text ?? undefined
         );
 
         setArtworkCanvas(canvas);

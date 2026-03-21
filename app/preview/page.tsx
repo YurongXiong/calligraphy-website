@@ -15,6 +15,7 @@ export default function PreviewPage() {
   const categoryId = useProjectStore((state) => state.categoryId);
   const templateId = useProjectStore((state) => state.templateId);
   const styleId = useProjectStore((state) => state.styleId);
+  const text = useProjectStore((state) => state.text);
 
   const [previewCanvas, setPreviewCanvas] = useState<HTMLCanvasElement | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +43,8 @@ export default function PreviewPage() {
           categoryId,
           selectedTemplate,
           brushStyle,
-          600
+          600,
+          text ?? undefined
         );
 
         setPreviewCanvas(canvas);
@@ -54,7 +56,7 @@ export default function PreviewPage() {
     };
 
     generatePreview();
-  }, [characters, categoryId, templateId, styleId]);
+  }, [characters, categoryId, templateId, styleId, text]);
 
   if (!categoryId || !characters.length) {
     return (

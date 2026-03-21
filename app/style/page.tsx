@@ -15,6 +15,7 @@ export default function StylePage() {
   const categoryId = useProjectStore((state) => state.categoryId);
   const templateId = useProjectStore((state) => state.templateId);
   const styleId = useProjectStore((state) => state.styleId);
+  const text = useProjectStore((state) => state.text);
   const setStyle = useProjectStore((state) => state.setStyle);
   const setTemplate = useProjectStore((state) => state.setTemplate);
 
@@ -42,7 +43,8 @@ export default function StylePage() {
           categoryId,
           template,
           style,
-          300
+          300,
+          text ?? undefined
         );
 
         setPreviewCanvas(canvas);
@@ -54,7 +56,7 @@ export default function StylePage() {
     };
 
     updatePreview();
-  }, [characters, categoryId, templateId, styleId]);
+  }, [characters, categoryId, templateId, styleId, text]);
 
   const handleContinue = () => {
     router.push('/preview');

@@ -74,6 +74,7 @@ export interface CharPosition {
   width: number;
   height: number;
   rotation: number;
+  positionType: 'upper' | 'lower' | 'banner' | 'single';
 }
 
 // 项目状态
