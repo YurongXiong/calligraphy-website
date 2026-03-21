@@ -168,6 +168,12 @@ export default function PreviewPage() {
           >
             导出作品
           </Link>
+          <button
+            onClick={() => router.push('/')}
+            className="w-full py-3 bg-paper border border-ink/20 text-ink/70 rounded-xl font-medium text-center hover:border-seal/40 hover:text-seal transition-colors"
+          >
+            创作新作品
+          </button>
         </div>
       </div>
     </main>

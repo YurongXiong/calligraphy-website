@@ -208,6 +208,14 @@ export default function ExportPage() {
           {exporting ? '导出中...' : exported ? '下载成功!' : `下载 ${format.toUpperCase()}`}
         </button>
 
+        {/* 创作新作品 */}
+        <button
+          onClick={() => router.push('/')}
+          className="w-full py-3 bg-paper border border-ink/20 text-ink/70 rounded-xl font-medium text-center hover:border-seal/40 hover:text-seal transition-colors mb-3"
+        >
+          创作新作品
+        </button>
+
         {/* 返回链接 */}
         <div className="text-center">
           <Link href="/preview" className="text-ink/60 hover:text-seal text-sm">
