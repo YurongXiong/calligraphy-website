@@ -32,18 +32,13 @@ export const useProjectStore = create<ProjectStore>()(
 
         if (categoryId === 'couplet' && typeof text === 'object') {
           const couplet = text as CoupletText;
-          console.log('[setText] IS couplet path', { couplet, upperLen: couplet.upper.length, lowerLen: couplet.lower.length, banner: couplet.banner });
-          charArray = [...couplet.upper, ...couplet.lower];
-          if (couplet.banner) {
-            charArray = [couplet.banner, ...charArray];
-          }
+          // 横批、上联、下联分别作为一个字符串，整体作为 charArray 的一个元素
+          if (couplet.banner) charArray.push(couplet.banner);
+          charArray.push(...couplet.upper.split(''));
+          charArray.push(...couplet.lower.split(''));
         } else if (typeof text === 'string') {
-          console.log('[setText] STRING path, text:', text, 'len:', text.length);
           charArray = text.split('');
-        } else {
-          console.log('[setText] NEITHER, typeof text:', typeof text, 'text:', text);
         }
-        console.log('[setText] categoryId:', categoryId, 'charArray:', charArray.join(''));
 
         const characters: CharacterStrokes[] = charArray.map((char, idx) => ({
           charId: generateId(),
