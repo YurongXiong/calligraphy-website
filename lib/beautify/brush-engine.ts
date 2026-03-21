@@ -11,6 +11,7 @@ function toPFPoints(points: Point[]): [number, number, number][] {
 
 /**
  * 自然风格参数
+ * taper/size ≈ 0.4，cap: true 消除三角形尖头
  */
 const NATURAL_PARAMS = {
   size: 14,
@@ -18,8 +19,8 @@ const NATURAL_PARAMS = {
   smoothing: 0.5,
   streamline: 0.5,
   simulatePressure: true,
-  start: { taper: 15 },
-  end: { taper: 15 },
+  start: { cap: true, taper: 6 },
+  end: { cap: true, taper: 6 },
 };
 
 /**
@@ -31,12 +32,13 @@ const HEAVY_INK_PARAMS = {
   smoothing: 0.6,
   streamline: 0.6,
   simulatePressure: true,
-  start: { taper: 5 },
-  end: { taper: 8 },
+  start: { cap: true, taper: 8 },
+  end: { cap: true, taper: 10 },
 };
 
 /**
  * 飞白风格参数
+ * 保持飞白特色但控制 taper 上限，避免三角形
  */
 const FLYING_WHITE_PARAMS = {
   size: 18,
@@ -44,8 +46,8 @@ const FLYING_WHITE_PARAMS = {
   smoothing: 0.3,
   streamline: 0.3,
   simulatePressure: true,
-  start: { taper: 25 },
-  end: { taper: 30 },
+  start: { cap: true, taper: 6 },
+  end: { cap: true, taper: 8 },
 };
 
 /**

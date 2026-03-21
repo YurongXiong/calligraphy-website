@@ -37,9 +37,10 @@ Each page is a standalone route in `app/`. State flows through Zustand store (`s
 
 ### Drawing Pipeline
 
-1. **WritingCanvas** (`components/write/WritingCanvas.tsx`) — dual-canvas system:
-   - Bottom canvas: grid lines (米字格)
-   - Top canvas: stroke rendering
+1. **WritingCanvas** (`components/write/WritingCanvas.tsx`) — triple-canvas system with RAF:
+   - Bottom canvas (gridCanvas): grid lines (米字格), drawn once on mount/resize
+   - Middle canvas (bgCanvas): completed strokes, updated when stroke ends (incremental merge)
+   - Top canvas (fgCanvas): current active stroke, RAF-scheduled via `scheduleRedraw()` with `rafIdRef` dedup
    - Touch events captured natively (not React's onPointer*), converted to `Point[]`
    - Each stroke saved as `{ id, points, smoothedPath }`
 
