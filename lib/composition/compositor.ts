@@ -39,7 +39,7 @@ export async function composeArtwork(
   const contentArea = getContentArea(width, height);
 
   // 计算春联的分组信息
-  const coupletInfo = getCoupletInfo(categoryId, characters.length, text);
+  const coupletInfo = getCoupletInfo(categoryId, text);
 
   // 计算布局
   const positions = calculateLayout(
@@ -54,7 +54,7 @@ export async function composeArtwork(
   for (let i = 0; i < positions.length; i++) {
     const pos = positions[i];
     // 获取对应的字在 characters 数组中的索引
-    const charIndex = getCharIndexByPosition(pos, coupletInfo, i);
+    const charIndex = getCharIndexByPosition(pos, coupletInfo, characters.length, i);
     if (charIndex < 0 || charIndex >= characters.length) continue;
 
     const char = characters[charIndex];
@@ -88,36 +88,48 @@ export async function composeArtwork(
 }
 
 /**
- * 根据位置数组中的绝对索引 positionIdx，计算 characters 数组中的索引
+ * 根据 positionType 确定 characters 数组中的绝对索引
  *
- * positions 数组的顺序: [upper(0..upperCount-1), lower(upperCount..upperCount+lowerCount-1), banner(...)]
- * characters 数组的顺序: [banner?(0..bannerCount-1), upper(bannerCount..bannerCount+upperCount-1), lower(...)]
+ * positions 数组顺序：[upper(0..upperCount-1), lower(upperCount..upperCount+lowerCount-1), banner]
+ * characters 数组顺序：[banner(0..bannerCount-1), upper(bannerCount..), lower(...)]
  */
 function getCharIndexByPosition(
   pos: { positionType: 'upper' | 'lower' | 'banner' | 'single' },
-  coupletInfo: ReturnType<typeof getCoupletInfo>,
+  coupletInfo: { upperCount: number; lowerCount: number; bannerCount: number } | undefined,
+  totalChars: number,
   positionIdx: number
 ): number {
+  // 防御性边界检查
+  if (positionIdx < 0 || positionIdx >= totalChars) {
+    return 0;
+  }
+
   if (!coupletInfo) {
+    // 非春联：一对一映射
     return positionIdx;
   }
 
   const { bannerCount, upperCount, lowerCount } = coupletInfo;
 
-  if (pos.positionType === 'upper') {
-    // positionIdx 是 0..upperCount-1，characters 中 upper 从 bannerCount 开始
-    return bannerCount + positionIdx;
+  switch (pos.positionType) {
+    case 'upper': {
+      // 上联：characters[bannerCount + positionIdx]
+      const upperIdx = bannerCount + positionIdx;
+      return upperIdx < totalChars ? upperIdx : positionIdx;
+    }
+    case 'lower': {
+      // 下联：characters[bannerCount + upperCount + (positionIdx - upperCount)]
+      const lowerIdx = bannerCount + upperCount + (positionIdx - upperCount);
+      return lowerIdx < totalChars ? lowerIdx : positionIdx;
+    }
+    case 'banner': {
+      // 横批：characters[positionIdx - upperCount - lowerCount]
+      const bannerIdx = positionIdx - upperCount - lowerCount;
+      return bannerIdx >= 0 ? bannerIdx : positionIdx;
+    }
+    default:
+      return positionIdx;
   }
-  if (pos.positionType === 'lower') {
-    // positionIdx 是 upperCount..upperCount+lowerCount-1
-    // 组内偏移 = positionIdx - upperCount
-    return bannerCount + upperCount + (positionIdx - upperCount);
-  }
-  if (pos.positionType === 'banner') {
-    // positionIdx 是 upperCount+lowerCount 之后
-    return positionIdx - upperCount - lowerCount;
-  }
-  return positionIdx;
 }
 
 /**
@@ -125,16 +137,15 @@ function getCharIndexByPosition(
  */
 function getCoupletInfo(
   categoryId: CategoryId,
-  totalChars: number,
   text?: string | CoupletText
 ): { upperCount: number; lowerCount: number; bannerCount: number } | undefined {
   if (categoryId !== 'couplet' || !text) return undefined;
 
   if (typeof text === 'object' && 'upper' in text) {
     return {
-      upperCount: text.upper.length,
-      lowerCount: text.lower.length,
-      bannerCount: text.banner?.length ?? 0,
+      upperCount: (text as CoupletText).upper.length,
+      lowerCount: (text as CoupletText).lower.length,
+      bannerCount: (text as CoupletText).banner?.length ?? 0,
     };
   }
 
