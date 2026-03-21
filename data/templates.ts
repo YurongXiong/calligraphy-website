@@ -1,0 +1,55 @@
+import { Template } from '@/types';
+
+export const templates: Template[] = [
+  // 春联模板
+  {
+    id: 'couplet-light',
+    name: '素雅宣纸',
+    categoryId: 'couplet',
+    bgColor: '#f5f0e8',
+    borderStyle: 'single',
+    textColor: '#1a1a1a',
+  },
+  {
+    id: 'couplet-dark',
+    name: '深色洒金',
+    categoryId: 'couplet',
+    bgColor: '#2a2520',
+    borderStyle: 'double',
+    textColor: '#d4af37',
+  },
+  // 挂画模板
+  {
+    id: 'hanging-light',
+    name: '浅色留白',
+    categoryId: 'hanging',
+    bgColor: '#f8f5ef',
+    borderStyle: 'simple',
+    textColor: '#1a1a1a',
+  },
+  {
+    id: 'hanging-dark',
+    name: '水墨晕染',
+    categoryId: 'hanging',
+    bgColor: '#3a3530',
+    borderStyle: 'ink',
+    textColor: '#e8dfd0',
+  },
+  // 牌匾模板
+  {
+    id: 'plaque-light',
+    name: '红木素雅',
+    categoryId: 'plaque',
+    bgColor: '#f0ebe0',
+    borderStyle: 'solid',
+    textColor: '#4a3728',
+  },
+  {
+    id: 'plaque-dark',
+    name: '古铜印迹',
+    categoryId: 'plaque',
+    bgColor: '#1a1815',
+    borderStyle: 'engraved',
+    textColor: '#c9a86c',
+  },
+];
