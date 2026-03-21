@@ -41,6 +41,12 @@ export async function composeArtwork(
   // 计算春联的分组信息
   const coupletInfo = getCoupletInfo(categoryId, text);
 
+  // DEBUG
+  console.log('[composeArtwork] text:', JSON.stringify(text));
+  console.log('[composeArtwork] coupletInfo:', coupletInfo);
+  console.log('[composeArtwork] characters.length:', characters.length);
+  console.log('[composeArtwork] characters chars:', characters.map(c => c.character));
+
   // 计算布局
   const positions = calculateLayout(
     categoryId,
@@ -50,11 +56,15 @@ export async function composeArtwork(
     coupletInfo
   );
 
+  console.log('[composeArtwork] positions.length:', positions.length);
+  console.log('[composeArtwork] positions:', positions.map(p => ({ type: p.positionType, x: p.x, y: p.y })));
+
   // 按 positionType 渲染每个字
   for (let i = 0; i < positions.length; i++) {
     const pos = positions[i];
     // 获取对应的字在 characters 数组中的索引
     const charIndex = getCharIndexByPosition(pos, coupletInfo, characters.length, i);
+    console.log(`[composeArtwork] posIdx=${i} posType=${pos.positionType} → charIndex=${charIndex} char=${charIndex >= 0 && charIndex < characters.length ? characters[charIndex].character : 'OOB'}`);
     if (charIndex < 0 || charIndex >= characters.length) continue;
 
     const char = characters[charIndex];
