@@ -50,62 +50,84 @@ export function calculateCoupletLayout(
 ): CharPosition[] {
   const positions: CharPosition[] = [];
 
-  // 竖排部分：左右两列
-  const verticalMarginX = 80;
-  const verticalMarginTop = 160; // 横批区域占用的顶部空间
-  const verticalMarginBottom = 80;
-  const columnGap = 80; // 左右列之间的间距
+  // ============================================================
+  // 新布局（横向幅面）：横批居中顶部，上下联分列底部左右
+  // ============================================================
 
-  const usableWidth = contentWidth - verticalMarginX * 2;
-  const usableHeight = contentHeight - verticalMarginTop - verticalMarginBottom;
+  // 整体边距
+  const marginX = 120;
+  const marginY = 120;
+
+  // 内容区域
+  const usableWidth = contentWidth - marginX * 2;
+  const usableHeight = contentHeight - marginY * 2;
+
+  // 横批区域：顶部 40% 高度
+  const bannerAreaHeight = usableHeight * 0.38;
+  // 上下联区域：底部 60%
+  const coupletAreaHeight = usableHeight - bannerAreaHeight;
+
+  // 横批字号 = min(上下联字号，banner区域可用宽度/bannerCount)
+  // 先计算上下联每字大小
+  const upperCharSize = coupletAreaHeight / Math.max(upperCount, 1);
+  const lowerCharSize = coupletAreaHeight / Math.max(lowerCount, 1);
+  const coupletCharSize = Math.min(upperCharSize, lowerCharSize);
+
+  // 横批每字宽度 = min( coupletCharSize, 可用宽度 * 0.6 / bannerCount )
+  const bannerCharSize = Math.min(coupletCharSize, usableWidth * 0.55 / Math.max(bannerCount, 1));
+  // 横批实际占用宽度
+  const bannerTotalWidth = bannerCharSize * bannerCount;
+
+  // -------- 横批：顶部居中，字横排 --------
+  if (bannerCount > 0) {
+    const bannerStartX = (contentWidth - bannerTotalWidth) / 2;
+    const bannerStartY = marginY + (bannerAreaHeight - bannerCharSize) / 2;
+    for (let i = 0; i < bannerCount; i++) {
+      positions.push({
+        x: bannerStartX + i * bannerCharSize,
+        y: bannerStartY,
+        width: bannerCharSize,
+        height: bannerCharSize,
+        rotation: 0,
+        positionType: 'banner',
+      });
+    }
+  }
+
+  // -------- 上下联：底部区域，左右分列 --------
+  // 两列中间间距
+  const columnGap = 200;
+  // 每列宽度 = (可用宽度 - columnGap) / 2
   const columnWidth = (usableWidth - columnGap) / 2;
 
-  // 上联 - 右侧，字竖排（从上到下）
-  const upperCharHeight = usableHeight / Math.max(upperCount, 1);
+  // 上联 - 右侧（视觉右侧），字竖排从上到下
   for (let i = 0; i < upperCount; i++) {
+    const charHeight = coupletCharSize;
+    const charWidth = columnWidth;
+    const startY = marginY + bannerAreaHeight + (coupletAreaHeight - upperCount * charHeight) / 2;
     positions.push({
-      x: verticalMarginX + columnWidth + columnGap,
-      y: verticalMarginTop + i * upperCharHeight,
-      width: columnWidth,
-      height: upperCharHeight,
+      x: marginX + columnWidth + columnGap, // 右侧列起始X
+      y: startY + i * charHeight,
+      width: charWidth,
+      height: charHeight,
       rotation: 0,
       positionType: 'upper',
     });
   }
 
-  // 下联 - 左侧，字竖排（从上到下）
-  const lowerCharHeight = usableHeight / Math.max(lowerCount, 1);
+  // 下联 - 左侧，字竖排从上到下
   for (let i = 0; i < lowerCount; i++) {
+    const charHeight = coupletCharSize;
+    const charWidth = columnWidth;
+    const startY = marginY + bannerAreaHeight + (coupletAreaHeight - lowerCount * charHeight) / 2;
     positions.push({
-      x: verticalMarginX,
-      y: verticalMarginTop + i * lowerCharHeight,
-      width: columnWidth,
-      height: lowerCharHeight,
+      x: marginX,
+      y: startY + i * charHeight,
+      width: charWidth,
+      height: charHeight,
       rotation: 0,
       positionType: 'lower',
     });
-  }
-
-  // 横批 - 顶部，字横排（从左到右）
-  // 字号与上联/下联保持一致
-  if (bannerCount > 0) {
-    const bannerCharHeight = Math.max(upperCharHeight, lowerCharHeight); // 和上下联字号一致
-    const bannerCharWidth = bannerCharHeight; // 方形字格
-    const bannerTotalWidth = bannerCharWidth * bannerCount;
-    // 横批在顶部区域垂直居中
-    const bannerStartX = (contentWidth - bannerTotalWidth) / 2;
-    const bannerStartY = (verticalMarginTop - bannerCharHeight) / 2;
-
-    for (let i = 0; i < bannerCount; i++) {
-      positions.push({
-        x: bannerStartX + i * bannerCharWidth,
-        y: bannerStartY,
-        width: bannerCharWidth,
-        height: bannerCharHeight,
-        rotation: 0,
-        positionType: 'banner',
-      });
-    }
   }
 
   return positions;
@@ -187,7 +209,7 @@ function calculatePlaqueLayout(
 export function getCanvasSize(categoryId: CategoryId): { width: number; height: number } {
   switch (categoryId) {
     case 'couplet':
-      return { width: 2160, height: 4800 };
+      return { width: 4800, height: 2800 };
     case 'hanging':
       return { width: 2160, height: 3840 };
     case 'plaque':
