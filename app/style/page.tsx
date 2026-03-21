@@ -102,9 +102,6 @@ export default function StylePage() {
             className="mx-auto rounded-lg overflow-hidden border border-paper-dark shadow-lg"
             style={{
               backgroundColor: templates.find((t) => t.id === templateId)?.bgColor || '#f5f0e8',
-              width: 300,
-              height: 'auto',
-              aspectRatio: '3/4',
             }}
           >
             {loading ? (
