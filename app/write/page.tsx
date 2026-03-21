@@ -29,6 +29,11 @@ export default function WritePage() {
 
   return (
     <div className="min-h-screen bg-paper flex flex-col">
+      {/* 调试：直接显示characters数组 */}
+      <div className="bg-red-100 text-red-600 text-xs p-2 text-center">
+        characters数组[{characters.map(c => c.character).join(',')}] 共{characters.length}个
+      </div>
+
       {/* 顶部导航 */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-paper-dark">
         <Link href="/input" className="text-ink/60 hover:text-ink text-sm flex items-center gap-1">
