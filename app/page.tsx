@@ -1,10 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { categories } from '@/data/categories';
 import { CategoryCard } from '@/components/home/CategoryCard';
 import { HeroSection } from '@/components/home/HeroSection';
-import { DraftEntry } from '@/components/home/DraftEntry';
 
 export default function Home() {
   return (
@@ -21,14 +19,11 @@ export default function Home() {
         </div>
 
         {/* 分类卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />
           ))}
         </div>
-
-        {/* 最近草稿 */}
-        <DraftEntry />
       </section>
 
       {/* 页脚 */}
