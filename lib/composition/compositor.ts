@@ -1,5 +1,5 @@
 import type { CharacterStrokes, CategoryId, BrushStyle, Template, CoupletText } from '../../types';
-import { calculateLayout, getCanvasSize } from './layout-engine';
+import { calculateLayout, getCanvasSize, calculateCoupletLayoutWithFrames, type Rect } from './layout-engine';
 import { renderCharacter } from '../beautify';
 
 // 书写画布的尺寸（WritingCanvas.tsx 里的 canvasSize 最大约 400）
@@ -41,7 +41,52 @@ export async function composeArtwork(
   // 计算春联的分组信息
   const coupletInfo = getCoupletInfo(categoryId, text);
 
-  // 计算布局
+  // 春联：绘制三个内框，并使用新的布局计算
+  if (categoryId === 'couplet' && coupletInfo) {
+    const { upperCount, lowerCount, bannerCount } = coupletInfo;
+    const sectionGap = 60;
+    const innerFramePadding = 16;
+
+    // 统一字号由布局引擎计算
+    const layoutResult = calculateCoupletLayoutWithFrames(
+      upperCount, lowerCount, bannerCount,
+      contentArea.width, contentArea.height,
+      sectionGap, innerFramePadding
+    );
+
+    // 绘制三个内框
+    drawCoupletInnerFrames(ctx, contentArea, coupletInfo, layoutResult, sectionGap, template.borderStyle);
+
+    // 使用布局结果中的字位置（已经是绝对坐标）
+    for (let i = 0; i < layoutResult.positions.length; i++) {
+      const pos = layoutResult.positions[i];
+      const absX = contentArea.x + pos.x;
+      const absY = contentArea.y + pos.y;
+
+      const charIndex = getCharIndexByPosition(pos, coupletInfo, characters.length, i);
+      if (charIndex < 0 || charIndex >= characters.length) continue;
+      const char = characters[charIndex];
+      if (!char.strokes.length) continue;
+
+      const scaleX = pos.width / STROKE_CANVAS_SIZE;
+      const scaleY = pos.height / STROKE_CANVAS_SIZE;
+      const scale = Math.min(scaleX, scaleY);
+      const scaledStrokeWidth = STROKE_CANVAS_SIZE * scale;
+      const scaledStrokeHeight = STROKE_CANVAS_SIZE * scale;
+      const offsetInCellX = (pos.width - scaledStrokeWidth) / 2;
+      const offsetInCellY = (pos.height - scaledStrokeHeight) / 2;
+      const finalX = absX + offsetInCellX;
+      const finalY = absY + offsetInCellY;
+
+      renderCharacter(ctx, char.strokes, style, finalX, finalY, scale, template.textColor);
+    }
+
+    // 绘制水印
+    drawWatermark(ctx, width, height);
+    return canvas;
+  }
+
+  // 非春联：使用原有布局
   const positions = calculateLayout(
     categoryId,
     characters.length,
@@ -213,6 +258,63 @@ function drawBorder(ctx: CanvasRenderingContext2D, borderStyle: string, width: n
   ctx.fillRect(borderWidth, height - borderWidth - innerLineWidth, width - borderWidth * 2, innerLineWidth); // 下
   ctx.fillRect(borderWidth, borderWidth, innerLineWidth, height - borderWidth * 2); // 左
   ctx.fillRect(width - borderWidth - innerLineWidth, borderWidth, innerLineWidth, height - borderWidth * 2); // 右
+}
+
+/**
+ * 绘制春联的三个内框（横批、上联、下联各自的独立边框）
+ * 大框包三个小框，参考 couplet reference_2
+ */
+function drawCoupletInnerFrames(
+  ctx: CanvasRenderingContext2D,
+  contentArea: { x: number; y: number; width: number; height: number },
+  coupletInfo: { upperCount: number; lowerCount: number; bannerCount: number },
+  layoutResult: { banner: Rect; upper: Rect; lower: Rect },
+  sectionGap: number,
+  borderStyle: string
+): void {
+  const { x, y, width, height } = contentArea;
+  const { banner, upper, lower } = layoutResult;
+
+  // borderStyle 'double' = 红底金字模板，金色框；其他 = 素雅宣纸，无色（透明）
+  const isGold = borderStyle === 'double';
+  const outerColor = isGold ? '#c9a227' : 'rgba(0,0,0,0)';
+  const innerColor = isGold ? '#8b6914' : 'rgba(0,0,0,0)';
+  const innerLineW = 15;
+
+  // 横批：顶部居中
+  const bannerAbs = { x: x + (width - banner.width) / 2, y: y, width: banner.width, height: banner.height };
+  drawSingleFrame(ctx, bannerAbs.x, bannerAbs.y, bannerAbs.width, bannerAbs.height, outerColor, innerColor, innerLineW);
+
+  // 上联：右侧，贴着横批下方
+  const upperAbs = { x: x + width - upper.width, y: y + banner.height + sectionGap, width: upper.width, height: upper.height };
+  drawSingleFrame(ctx, upperAbs.x, upperAbs.y, upperAbs.width, upperAbs.height, outerColor, innerColor, innerLineW);
+
+  // 下联：左侧，贴着横批下方
+  const lowerAbs = { x: x, y: y + banner.height + sectionGap, width: lower.width, height: lower.height };
+  drawSingleFrame(ctx, lowerAbs.x, lowerAbs.y, lowerAbs.width, lowerAbs.height, outerColor, innerColor, innerLineW);
+}
+
+/**
+ * 绘制单个内框（红框+金线）
+ */
+function drawSingleFrame(
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number, w: number, h: number,
+  outerColor: string, innerColor: string, innerLineW: number
+): void {
+  const pad = 24;
+  // 外红线
+  ctx.fillStyle = outerColor;
+  ctx.fillRect(x, y, w, pad); // 上
+  ctx.fillRect(x, y + h - pad, w, pad); // 下
+  ctx.fillRect(x, y, pad, h); // 左
+  ctx.fillRect(x + w - pad, y, pad, h); // 右
+  // 内金线
+  ctx.fillStyle = innerColor;
+  ctx.fillRect(x + pad, y + pad, w - pad * 2, innerLineW); // 上
+  ctx.fillRect(x + pad, y + h - pad - innerLineW, w - pad * 2, innerLineW); // 下
+  ctx.fillRect(x + pad, y + pad, innerLineW, h - pad * 2); // 左
+  ctx.fillRect(x + w - pad - innerLineW, y + pad, innerLineW, h - pad * 2); // 右
 }
 
 /**

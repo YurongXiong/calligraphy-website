@@ -1,5 +1,12 @@
 import type { CategoryId, CharPosition } from '../../types';
 
+export interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /**
  * 计算每个字在内容区域中的位置和尺寸
  * 所有字按自然方向排列（不旋转），由 compositor 处理居中等细节
@@ -54,57 +61,47 @@ export function calculateCoupletLayout(
 
   // ============================================================
   // 竖向幅面布局：横批顶部居中，上下联左右分列
-  // 设计原则：横批字号 ≥ 上下联字号
+  // 设计原则：横批、上联、下联字号统一
   // ============================================================
 
   const marginX = 80;
   const marginY = 120;
   const marginBottom = 120;
   const columnGap = 80; // 左右列间距
+  const bannerGap = 80; // 横批与上下联间距
 
   const usableWidth = contentWidth - marginX * 2;
 
-  // Step 1: 估算横批字号（以内容区60%宽度能容纳banner为参考）
+  // Step 1: 估算上下联字号（以剩余高度分配，预留横批区域）
+  // 横批区域高度约为 1.3 倍字高 + bannerGap
+  const maxLineChars = Math.max(upperCount, lowerCount, 1);
+  const coupletAreaHeight = contentHeight - marginY - marginBottom;
+  const coupletCharSizeByHeight = coupletAreaHeight / (maxLineChars + 1.5); // +1.5 预留给横批
+
+  // Step 2: 估算横批字号（以宽度约束）
   const maxBannerChars = Math.max(bannerCount, 1);
   const bannerCharSizeByWidth = usableWidth * 0.6 / maxBannerChars;
 
-  // Step 2: 估算上下联字号（以剩余高度分配）
-  // 预留给横批区域约 2.5 倍字高
-  const approxBannerArea = bannerCharSizeByWidth * 2.5;
-  const coupletAreaHeight = contentHeight - marginY - marginBottom - approxBannerArea;
-  const maxLineChars = Math.max(upperCount, lowerCount, 1);
-  const coupletCharSizeByHeight = coupletAreaHeight / maxLineChars;
+  // Step 3: 确定统一字号 = min(宽度约束, 高度约束)
+  const charSize = Math.min(coupletCharSizeByHeight, bannerCharSizeByWidth);
 
-  // Step 3: 确定最终字号 = min(宽度约束, 高度约束)
-  const coupletCharSize = Math.min(coupletCharSizeByHeight, bannerCharSizeByWidth);
-  // 横批字号 = max(上下联字号, 宽度约束)，并给 1.2 倍留白
-  const bannerCharSize = Math.max(coupletCharSize, bannerCharSizeByWidth);
-
-  // Step 4: 实际横批区域高度
-  const bannerAreaHeight = Math.max(bannerCharSize * 1.3, coupletCharSize * 1.3);
-
-  // Step 5: 重新计算上下联字号（扣除横批区域后）
-  const actualCoupletAreaHeight = contentHeight - marginY - marginBottom - bannerAreaHeight;
-  const actualCoupletCharSize = Math.min(
-    actualCoupletAreaHeight / Math.max(upperCount, 1),
-    actualCoupletAreaHeight / Math.max(lowerCount, 1),
-    (contentWidth - marginX * 2 - columnGap) / 2
-  );
+  // Step 4: 横批区域高度（横批字高 + bannerGap）
+  const bannerAreaHeight = bannerCount > 0 ? charSize + bannerGap : 0;
 
   // 列宽 = (可用宽度 - 间距) / 2
   const columnWidth = (usableWidth - columnGap) / 2;
 
   // -------- 横批：顶部居中，字横排 --------
   if (bannerCount > 0) {
-    const bannerTotalWidth = bannerCharSize * bannerCount;
+    const bannerTotalWidth = charSize * bannerCount;
     const bannerStartX = (contentWidth - bannerTotalWidth) / 2;
     const bannerStartY = marginY;
     for (let i = 0; i < bannerCount; i++) {
       positions.push({
-        x: bannerStartX + i * bannerCharSize,
+        x: bannerStartX + i * charSize,
         y: bannerStartY,
-        width: bannerCharSize,
-        height: bannerCharSize,
+        width: charSize,
+        height: charSize,
         rotation: 0,
         positionType: 'banner',
       });
@@ -115,9 +112,9 @@ export function calculateCoupletLayout(
   for (let i = 0; i < upperCount; i++) {
     positions.push({
       x: marginX + columnWidth + columnGap,
-      y: marginY + bannerAreaHeight + i * actualCoupletCharSize,
+      y: marginY + bannerAreaHeight + i * charSize,
       width: columnWidth,
-      height: actualCoupletCharSize,
+      height: charSize,
       rotation: 0,
       positionType: 'upper',
     });
@@ -127,15 +124,97 @@ export function calculateCoupletLayout(
   for (let i = 0; i < lowerCount; i++) {
     positions.push({
       x: marginX,
-      y: marginY + bannerAreaHeight + i * actualCoupletCharSize,
+      y: marginY + bannerAreaHeight + i * charSize,
       width: columnWidth,
-      height: actualCoupletCharSize,
+      height: charSize,
       rotation: 0,
       positionType: 'lower',
     });
   }
 
   return positions;
+}
+
+/**
+ * 春联布局 v2：配合三个内框，字尽量撑满各自的小框
+ * 返回：各区域内框尺寸 + 每个字的位置
+ */
+export function calculateCoupletLayoutWithFrames(
+  upperCount: number,
+  lowerCount: number,
+  bannerCount: number,
+  contentWidth: number,
+  contentHeight: number,
+  sectionGap: number,
+  innerFramePadding: number
+): { banner: Rect; upper: Rect; lower: Rect; positions: CharPosition[] } {
+  const positions: CharPosition[] = [];
+
+  // 统一字号：取上联/下联可用高度能容纳的最大字
+  // 可用高度 = 总高 - 横批区预估 - 间距
+  // 先以高度约束估算字号
+  const maxLineChars = Math.max(upperCount, lowerCount, 1);
+  const charSizeByHeight = (contentHeight * 0.65) / maxLineChars;
+  // 再以宽度约束估算（两列+间距）
+  const coupletColWidth = contentWidth * 0.44; // 约占内容区44%
+  const charSizeByWidth = coupletColWidth - innerFramePadding * 2;
+  // 统一字号取较小值（确保两个方向都能放下）
+  const charSize = Math.min(charSizeByHeight, charSizeByWidth);
+
+  // 横批框
+  const bannerWidth = charSize * Math.max(bannerCount, 1) + innerFramePadding * 2;
+  const bannerHeight = charSize + innerFramePadding * 2;
+
+  // 上联/下联框：高度刚好包住所有字（字顶到字底 + padding）
+  const coupletColW = charSize + innerFramePadding * 2;
+  const coupletColH = charSize * Math.max(upperCount, lowerCount, 1) + innerFramePadding * 2;
+
+  // 上联框
+  const upper: Rect = { x: 0, y: 0, width: coupletColW, height: coupletColH };
+  // 下联框
+  const lower: Rect = { x: 0, y: 0, width: coupletColW, height: coupletColH };
+  // 横批框
+  const banner: Rect = { x: 0, y: 0, width: bannerWidth, height: bannerHeight };
+
+  // ===== 横批：居中横排 =====
+  for (let i = 0; i < bannerCount; i++) {
+    positions.push({
+      x: (contentWidth - bannerWidth) / 2 + innerFramePadding + i * charSize,
+      y: innerFramePadding,
+      width: charSize,
+      height: charSize,
+      rotation: 0,
+      positionType: 'banner',
+    });
+  }
+
+  // ===== 上联：右侧竖排 =====
+  // 上联从内容区右边缘往左排
+  const upperStartX = contentWidth - coupletColW;
+  for (let i = 0; i < upperCount; i++) {
+    positions.push({
+      x: upperStartX + innerFramePadding,
+      y: bannerHeight + sectionGap + innerFramePadding + i * charSize,
+      width: charSize,
+      height: charSize,
+      rotation: 0,
+      positionType: 'upper',
+    });
+  }
+
+  // ===== 下联：左侧竖排 =====
+  for (let i = 0; i < lowerCount; i++) {
+    positions.push({
+      x: innerFramePadding,
+      y: bannerHeight + sectionGap + innerFramePadding + i * charSize,
+      width: charSize,
+      height: charSize,
+      rotation: 0,
+      positionType: 'lower',
+    });
+  }
+
+  return { banner, upper, lower, positions };
 }
 
 /**
