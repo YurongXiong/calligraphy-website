@@ -89,4 +89,22 @@ export const templates: Template[] = [
     borderStyle: 'engraved',
     textColor: '#4a3728',
   },
+  // 单字模板
+  {
+    id: 'single-light',
+    name: '浅色宣纸',
+    categoryId: 'single',
+    bgColor: '#f5f0e8',
+    bgImage: '/textures/xuan-paper-light.jpg',
+    borderStyle: 'simple',
+    textColor: '#1a1a1a',
+  },
+  {
+    id: 'single-red',
+    name: '红底金字',
+    categoryId: 'single',
+    bgColor: '#b8312f',
+    borderStyle: 'solid',
+    textColor: '#d4af37',
+  },
 ];

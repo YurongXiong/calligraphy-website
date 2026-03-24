@@ -24,6 +24,8 @@ export function calculateLayout(
       return calculateHangingLayout(charCount, contentWidth, contentHeight);
     case 'plaque':
       return calculatePlaqueLayout(charCount, contentWidth, contentHeight);
+    case 'single':
+      return calculateSingleLayout(charCount, contentWidth, contentHeight);
     default:
       return calculateHangingLayout(charCount, contentWidth, contentHeight);
   }
@@ -171,6 +173,34 @@ function calculateHangingLayout(
 }
 
 /**
+ * 单字布局：单字居中放大
+ */
+function calculateSingleLayout(
+  charCount: number,
+  contentWidth: number,
+  contentHeight: number
+): CharPosition[] {
+  const positions: CharPosition[] = [];
+  const margin = 100;
+  const usableSize = Math.min(contentWidth, contentHeight) - margin * 2;
+
+  // 单字居中
+  const x = (contentWidth - usableSize) / 2;
+  const y = (contentHeight - usableSize) / 2;
+
+  positions.push({
+    x,
+    y,
+    width: usableSize,
+    height: usableSize,
+    rotation: 0,
+    positionType: 'single',
+  });
+
+  return positions;
+}
+
+/**
  * 牌匾布局：所有字横排居中
  */
 function calculatePlaqueLayout(
@@ -217,6 +247,8 @@ export function getCanvasSize(categoryId: CategoryId): { width: number; height: 
       return { width: 2160, height: 3840 };
     case 'plaque':
       return { width: 3840, height: 1440 };
+    case 'single':
+      return { width: 2160, height: 2160 };
     default:
       return { width: 2160, height: 3840 };
   }
@@ -232,6 +264,8 @@ export function getTextDirection(categoryId: CategoryId): 'vertical' | 'horizont
       return 'vertical';
     case 'plaque':
       return 'horizontal';
+    case 'single':
+      return 'vertical';
     default:
       return 'vertical';
   }

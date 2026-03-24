@@ -4,7 +4,7 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useProjectStore } from '@/stores/project-store';
-import { coupletExamples, hangingExamples, plaqueExamples } from '@/data/examples';
+import { coupletExamples, hangingExamples, plaqueExamples, singleExamples } from '@/data/examples';
 import { categories } from '@/data/categories';
 import { CategoryId, CoupletText } from '@/types';
 
@@ -22,7 +22,7 @@ export default function InputPage({ searchParams }: { searchParams: Promise<{ ca
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (params.category && ['couplet', 'hanging', 'plaque'].includes(params.category)) {
+    if (params.category && ['couplet', 'hanging', 'plaque', 'single'].includes(params.category)) {
       setCategoryId(params.category as CategoryId);
     }
   }, [params.category]);
@@ -85,7 +85,9 @@ export default function InputPage({ searchParams }: { searchParams: Promise<{ ca
     ? coupletExamples
     : categoryId === 'hanging'
       ? hangingExamples
-      : plaqueExamples;
+      : categoryId === 'single'
+        ? singleExamples
+        : plaqueExamples;
 
   return (
     <main className="min-h-screen bg-paper paper-texture">
@@ -137,7 +139,9 @@ export default function InputPage({ searchParams }: { searchParams: Promise<{ ca
             <div className="space-y-4">
               {/* 横批 */}
               <div>
-                <label className="block text-sm text-ink/60 mb-2">横批（可选）</label>
+                <label className="block text-sm text-ink/60 mb-2">
+                  横批 <span className="text-xs">（{bannerText.length}/4 字）</span>
+                </label>
                 <input
                   type="text"
                   value={bannerText}
@@ -157,7 +161,7 @@ export default function InputPage({ searchParams }: { searchParams: Promise<{ ca
                   type="text"
                   value={upperText}
                   onChange={(e) => setUpperText(e.target.value)}
-                  placeholder="请输入上联"
+                  placeholder="如：龙腾盛世千山秀"
                   maxLength={10}
                   className="w-full px-4 py-3 bg-paper-dark rounded-lg border border-paper-dark focus:border-seal focus:outline-none text-ink text-center text-lg tracking-wider"
                 />
@@ -172,7 +176,7 @@ export default function InputPage({ searchParams }: { searchParams: Promise<{ ca
                   type="text"
                   value={lowerText}
                   onChange={(e) => setLowerText(e.target.value)}
-                  placeholder="请输入下联"
+                  placeholder="如：凤舞神州万象新"
                   maxLength={10}
                   className="w-full px-4 py-3 bg-paper-dark rounded-lg border border-paper-dark focus:border-seal focus:outline-none text-ink text-center text-lg tracking-wider"
                 />
@@ -194,7 +198,7 @@ export default function InputPage({ searchParams }: { searchParams: Promise<{ ca
                 type="text"
                 value={singleText}
                 onChange={(e) => setSingleText(e.target.value)}
-                placeholder={categoryId === 'hanging' ? '如：宁静致远' : '如：书房'}
+                placeholder={categoryId === 'hanging' ? '如：宁静致远' : categoryId === 'single' ? '如：福' : '如：书房'}
                 maxLength={currentCategory?.maxChars}
                 className="w-full px-4 py-3 bg-paper-dark rounded-lg border border-paper-dark focus:border-seal focus:outline-none text-ink text-center text-xl tracking-wider"
               />

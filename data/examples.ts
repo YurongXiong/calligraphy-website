@@ -22,3 +22,10 @@ export const plaqueExamples: string[] = [
   '静心',
   '翰墨',
 ];
+
+export const singleExamples: string[] = [
+  '福',
+  '寿',
+  '喜',
+  '乐',
+];

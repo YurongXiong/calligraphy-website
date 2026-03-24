@@ -47,7 +47,7 @@ export interface CoupletText {
 }
 
 // 作品形式
-export type CategoryId = 'couplet' | 'hanging' | 'plaque';
+export type CategoryId = 'couplet' | 'hanging' | 'plaque' | 'single';
 
 export interface Category {
   id: CategoryId;

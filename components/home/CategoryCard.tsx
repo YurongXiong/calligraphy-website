@@ -11,12 +11,14 @@ const categoryIcons: Record<string, string> = {
   couplet: '福',
   hanging: '雅',
   plaque: '匾',
+  single: '墨',
 };
 
 const categoryBgColors: Record<string, string> = {
   couplet: 'bg-seal/10',
   hanging: 'bg-bamboo/10',
   plaque: 'bg-gold/10',
+  single: 'bg-gold/10',
 };
 
 export function CategoryCard({ category }: CategoryCardProps) {

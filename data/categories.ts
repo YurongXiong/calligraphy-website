@@ -20,4 +20,10 @@ export const categories: Category[] = [
     description: '门楣匾额，翰墨留香',
     maxChars: 4,
   },
+  {
+    id: 'single',
+    name: '单字',
+    description: '一字凝神，方寸印心',
+    maxChars: 1,
+  },
 ];
