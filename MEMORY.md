@@ -41,6 +41,19 @@
 - DPR 缩放处理高清屏
 - 触摸事件直接绑定原生事件，不用 React onPointer*
 
+## 重要配置注意事项
+
+### allowedDevOrigins 配置
+**问题**：手机无法访问开发服务器，点击按钮无反应
+**原因**：`next.config.ts` 中的 `allowedDevOrigins` 只配置了特定IP，手机IP `192.168.0.100` 未包含在内
+**解决**：将 `localhost` 和所有可能用到的IP都加入白名单
+```ts
+const nextConfig: NextConfig = {
+  allowedDevOrigins: ['192.168.0.100', 'localhost'],
+};
+```
+**教训**：开发阶段建议使用 `localhost` 或留空（允许所有来源），避免手机测试时踩坑
+
 ## 待讨论/确认事项
 
 - 春联布局（上下联+横批）的完整实现方式

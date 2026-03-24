@@ -167,23 +167,6 @@ export function renderStroke(
   const path = new Path2D(d);
   ctx.fill(path);
 
-  // 飞白：在笔画上叠加不规则挖空效果
-  if (style.textureType === 'dry-brush') {
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-
-    for (let i = 0; i < 40; i++) {
-      const idx = Math.floor(Math.random() * stroke.length);
-      const [x, y] = stroke[idx];
-      const r = Math.random() * 3.5 + 0.5;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-
   ctx.restore();
 }
 
