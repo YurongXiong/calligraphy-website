@@ -30,7 +30,7 @@ export async function composeArtwork(
   const ctx = canvas.getContext('2d')!;
 
   // 绘制背景
-  drawBackground(ctx, template.bgColor, width, height);
+  await drawBackground(ctx, template, width, height);
 
   // 绘制装裱边框
   drawBorder(ctx, template.borderStyle, width, height);
@@ -170,9 +170,27 @@ function getContentArea(width: number, height: number): { x: number; y: number; 
 /**
  * 绘制背景
  */
-function drawBackground(ctx: CanvasRenderingContext2D, bgColor: string, width: number, height: number): void {
-  ctx.fillStyle = bgColor;
-  ctx.fillRect(0, 0, width, height);
+async function drawBackground(ctx: CanvasRenderingContext2D, template: Template, width: number, height: number): Promise<void> {
+  if (template.bgImage) {
+    const img = new Image();
+    img.src = template.bgImage;
+    await new Promise<void>((resolve) => {
+      img.onload = () => {
+        // 使用 3 参数 drawImage 进行 cover 缩放
+        // 这会自动缩放图片以覆盖整个画布
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve();
+      };
+      img.onerror = () => {
+        ctx.fillStyle = template.bgColor;
+        ctx.fillRect(0, 0, width, height);
+        resolve();
+      };
+    });
+  } else {
+    ctx.fillStyle = template.bgColor;
+    ctx.fillRect(0, 0, width, height);
+  }
 }
 
 /**

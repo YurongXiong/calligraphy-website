@@ -63,6 +63,7 @@ export interface Template {
   name: string;
   categoryId: CategoryId;
   bgColor: string;
+  bgImage?: string;
   borderStyle: string;
   textColor: string;
 }
