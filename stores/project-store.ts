@@ -21,6 +21,7 @@ export const useProjectStore = create<ProjectStore>()(
           couplet: 'couplet-light',
           hanging: 'hanging-light',
           plaque: 'plaque-light',
+          single: 'single-light',
         };
         set({ templateId: templateMap[id] });
       },
