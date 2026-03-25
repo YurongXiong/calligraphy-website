@@ -28,6 +28,7 @@ export default function RootLayout({
       className={`${notoSerifSC.variable}`}
     >
       <body className="min-h-full flex flex-col bg-paper paper-texture">
+        <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
         <BodyWrapper>{children}</BodyWrapper>
       </body>
     </html>

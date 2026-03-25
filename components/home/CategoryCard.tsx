@@ -18,7 +18,7 @@ const categoryBgColors: Record<string, string> = {
   couplet: 'bg-seal/10',
   hanging: 'bg-bamboo/10',
   plaque: 'bg-gold/10',
-  single: 'bg-gold/10',
+  single: 'bg-[rgba(210,209,207,0.1)]',
 };
 
 export function CategoryCard({ category }: CategoryCardProps) {
