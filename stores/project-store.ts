@@ -4,6 +4,14 @@ import { ProjectStore, CategoryId, BrushStyle, Stroke, CharacterStrokes, Couplet
 
 const generateId = () => Math.random().toString(36).substring(2, 15);
 
+// 每个分类对应的默认模板 ID
+const DEFAULT_TEMPLATE_MAP: Record<CategoryId, string> = {
+  couplet: 'couplet-light',
+  hanging: 'hanging-light',
+  plaque: 'plaque-light',
+  single: 'single-light',
+};
+
 export const useProjectStore = create<ProjectStore>()(
   persist(
     (set, get) => ({
@@ -16,14 +24,7 @@ export const useProjectStore = create<ProjectStore>()(
       templateId: 'couplet-light',
 
       setCategory: (id: CategoryId) => {
-        set({ categoryId: id });
-        const templateMap: Record<CategoryId, string> = {
-          couplet: 'couplet-light',
-          hanging: 'hanging-light',
-          plaque: 'plaque-light',
-          single: 'single-light',
-        };
-        set({ templateId: templateMap[id] });
+        set({ categoryId: id, templateId: DEFAULT_TEMPLATE_MAP[id] });
       },
 
       setText: (text: string | CoupletText) => {
@@ -91,32 +92,40 @@ export const useProjectStore = create<ProjectStore>()(
           savedAt: Date.now(),
         };
 
-        const drafts = JSON.parse(localStorage.getItem('calligraphy-drafts') || '[]');
-        const existingIndex = drafts.findIndex((d: { projectId: string }) => d.projectId === state.projectId);
+        try {
+          const drafts = JSON.parse(localStorage.getItem('calligraphy-drafts') || '[]');
+          const existingIndex = drafts.findIndex((d: { projectId: string }) => d.projectId === state.projectId);
 
-        if (existingIndex >= 0) {
-          drafts[existingIndex] = draft;
-        } else {
-          drafts.unshift(draft);
+          if (existingIndex >= 0) {
+            drafts[existingIndex] = draft;
+          } else {
+            drafts.unshift(draft);
+          }
+
+          localStorage.setItem('calligraphy-drafts', JSON.stringify(drafts.slice(0, 10)));
+        } catch {
+          // 忽略存储错误，避免影响正常功能
         }
-
-        localStorage.setItem('calligraphy-drafts', JSON.stringify(drafts.slice(0, 10)));
       },
 
       loadDraft: (projectId: string) => {
-        const drafts = JSON.parse(localStorage.getItem('calligraphy-drafts') || '[]');
-        const draft = drafts.find((d: { projectId: string }) => d.projectId === projectId);
+        try {
+          const drafts = JSON.parse(localStorage.getItem('calligraphy-drafts') || '[]');
+          const draft = drafts.find((d: { projectId: string }) => d.projectId === projectId);
 
-        if (draft) {
-          set({
-            projectId: draft.projectId,
-            categoryId: draft.categoryId,
-            text: draft.text,
-            characters: draft.characters,
-            styleId: draft.styleId,
-            templateId: draft.templateId,
-            currentCharIndex: 0,
-          });
+          if (draft) {
+            set({
+              projectId: draft.projectId,
+              categoryId: draft.categoryId,
+              text: draft.text,
+              characters: draft.characters,
+              styleId: draft.styleId,
+              templateId: draft.templateId,
+              currentCharIndex: 0,
+            });
+          }
+        } catch {
+          // 忽略存储错误，避免影响正常功能
         }
       },
     }),

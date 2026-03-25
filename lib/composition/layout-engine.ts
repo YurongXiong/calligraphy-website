@@ -20,13 +20,9 @@ export function calculateLayout(
 ): CharPosition[] {
   switch (categoryId) {
     case 'couplet':
-      return calculateCoupletLayout(
-        coupletInfo?.upperCount ?? charCount,
-        coupletInfo?.lowerCount ?? charCount,
-        coupletInfo?.bannerCount ?? 0,
-        contentWidth,
-        contentHeight
-      );
+      // 春联使用 calculateCoupletLayoutWithFrames（compositor 中直接调用）
+      // 此处返回空数组，实际上春联分支不会走到这里
+      return [];
     case 'hanging':
       return calculateHangingLayout(charCount, contentWidth, contentHeight);
     case 'plaque':
@@ -36,103 +32,6 @@ export function calculateLayout(
     default:
       return calculateHangingLayout(charCount, contentWidth, contentHeight);
   }
-}
-
-/**
- * 春联布局完整实现
- * - 横批：顶部居中横排
- * - 上联：右侧竖排（字从上到下）
- * - 下联：左侧竖排（字从上到下）
- *
- * @param upperCount 上联字数
- * @param lowerCount 下联字数
- * @param bannerCount 横批字数（0 或具体字数）
- * @param contentWidth 内容区域宽度
- * @param contentHeight 内容区域高度
- */
-export function calculateCoupletLayout(
-  upperCount: number,
-  lowerCount: number,
-  bannerCount: number,
-  contentWidth: number,
-  contentHeight: number
-): CharPosition[] {
-  const positions: CharPosition[] = [];
-
-  // ============================================================
-  // 竖向幅面布局：横批顶部居中，上下联左右分列
-  // 设计原则：横批、上联、下联字号统一
-  // ============================================================
-
-  const marginX = 80;
-  const marginY = 120;
-  const marginBottom = 120;
-  const columnGap = 80; // 左右列间距
-  const bannerGap = 80; // 横批与上下联间距
-
-  const usableWidth = contentWidth - marginX * 2;
-
-  // Step 1: 估算上下联字号（以剩余高度分配，预留横批区域）
-  // 横批区域高度约为 1.3 倍字高 + bannerGap
-  const maxLineChars = Math.max(upperCount, lowerCount, 1);
-  const coupletAreaHeight = contentHeight - marginY - marginBottom;
-  const coupletCharSizeByHeight = coupletAreaHeight / (maxLineChars + 1.5); // +1.5 预留给横批
-
-  // Step 2: 估算横批字号（以宽度约束）
-  const maxBannerChars = Math.max(bannerCount, 1);
-  const bannerCharSizeByWidth = usableWidth * 0.6 / maxBannerChars;
-
-  // Step 3: 确定统一字号 = min(宽度约束, 高度约束)
-  const charSize = Math.min(coupletCharSizeByHeight, bannerCharSizeByWidth);
-
-  // Step 4: 横批区域高度（横批字高 + bannerGap）
-  const bannerAreaHeight = bannerCount > 0 ? charSize + bannerGap : 0;
-
-  // 列宽 = (可用宽度 - 间距) / 2
-  const columnWidth = (usableWidth - columnGap) / 2;
-
-  // -------- 横批：顶部居中，字横排 --------
-  if (bannerCount > 0) {
-    const bannerTotalWidth = charSize * bannerCount;
-    const bannerStartX = (contentWidth - bannerTotalWidth) / 2;
-    const bannerStartY = marginY;
-    for (let i = 0; i < bannerCount; i++) {
-      positions.push({
-        x: bannerStartX + i * charSize,
-        y: bannerStartY,
-        width: charSize,
-        height: charSize,
-        rotation: 0,
-        positionType: 'banner',
-      });
-    }
-  }
-
-  // -------- 上联：右侧，字竖排 --------
-  for (let i = 0; i < upperCount; i++) {
-    positions.push({
-      x: marginX + columnWidth + columnGap,
-      y: marginY + bannerAreaHeight + i * charSize,
-      width: columnWidth,
-      height: charSize,
-      rotation: 0,
-      positionType: 'upper',
-    });
-  }
-
-  // -------- 下联：左侧，字竖排 --------
-  for (let i = 0; i < lowerCount; i++) {
-    positions.push({
-      x: marginX,
-      y: marginY + bannerAreaHeight + i * charSize,
-      width: columnWidth,
-      height: charSize,
-      rotation: 0,
-      positionType: 'lower',
-    });
-  }
-
-  return positions;
 }
 
 /**

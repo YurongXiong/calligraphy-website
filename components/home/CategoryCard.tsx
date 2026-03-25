@@ -1,20 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { Category } from '@/types';
+import { Category, CategoryId } from '@/types';
 
 interface CategoryCardProps {
   category: Category;
 }
 
-const categoryIcons: Record<string, string> = {
+const categoryIcons: Record<CategoryId, string> = {
   couplet: '福',
   hanging: '雅',
   plaque: '匾',
   single: '墨',
 };
 
-const categoryBgColors: Record<string, string> = {
+const categoryBgColors: Record<CategoryId, string> = {
   couplet: 'bg-seal/10',
   hanging: 'bg-bamboo/10',
   plaque: 'bg-gold/10',
