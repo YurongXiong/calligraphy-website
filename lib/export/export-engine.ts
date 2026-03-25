@@ -89,6 +89,7 @@ function generateFilename(categoryId: CategoryId, format: string): string {
     couplet: '春联',
     hanging: '挂画',
     plaque: '牌匾',
+    single: '单字',
   };
   return `书法_${categoryNames[categoryId]}_${timestamp}.${format}`;
 }
