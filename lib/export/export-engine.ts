@@ -40,7 +40,7 @@ export async function exportAsJPG(canvas: HTMLCanvasElement, quality: number = 0
 }
 
 /**
- * 触发浏览器下载 Blob
+ * 触发浏览器下载 Blob（标准方式）
  */
 export function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -51,6 +51,84 @@ export function downloadBlob(blob: Blob, filename: string): void {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+/**
+ * 检测是否为国产双核浏览器（QQ/UC/搜狗），这些浏览器的 blob URL 下载被拦截
+ */
+export function isDualCoreBrowser(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  return /QQBrowser|UCBrowser|SogouMSE|SogouMobile/.test(ua);
+}
+
+/**
+ * Blob → data URL
+ */
+function blobToDataURL(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * 触发 data URL 下载
+ */
+function downloadByDataURL(dataUrl: string, filename: string): void {
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = filename;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+/**
+ * 兼容所有浏览器的下载函数
+ * 策略：
+ *   - 正常浏览器：blob URL → data URL → 弹窗
+ *   - 国产双核浏览器：data URL + 弹窗同时触发（这些浏览器 download 静默失败，不抛错）
+ * @param blob 要下载的 blob
+ * @param filename 文件名
+ * @param onModalFallback 弹窗兜底回调，传入 data URL
+ */
+export async function downloadWithFallback(
+  blob: Blob,
+  filename: string,
+  onModalFallback?: (dataUrl: string) => void
+): Promise<void> {
+  // 国产双核浏览器：data URL 下载 + 弹窗兜底同时进行
+  // （这些浏览器的 <a click()> 全部静默失败，无法通过 try/catch 判断）
+  if (isDualCoreBrowser()) {
+    const dataUrl = await blobToDataURL(blob);
+    downloadByDataURL(dataUrl, filename); // 尝试下载，可能静默失败
+    onModalFallback?.(dataUrl); // 同时触发弹窗兜底
+    return;
+  }
+
+  // 正常浏览器：blob URL → data URL → 弹窗（try/catch 降级）
+  try {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch {
+    try {
+      const dataUrl = await blobToDataURL(blob);
+      downloadByDataURL(dataUrl, filename);
+    } catch {
+      const dataUrl = await blobToDataURL(blob);
+      onModalFallback?.(dataUrl);
+    }
+  }
 }
 
 /**

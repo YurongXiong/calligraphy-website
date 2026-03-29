@@ -7,7 +7,7 @@ import { useProjectStore } from '@/stores/project-store';
 import { getBrushStyle } from '@/lib/beautify/styles';
 import { templates } from '@/data/templates';
 import { composeArtwork } from '@/lib/composition';
-import { exportAsPNG, exportAsJPG, downloadBlob } from '@/lib/export';
+import { exportAsPNG, exportAsJPG, downloadWithFallback } from '@/lib/export';
 import type { BrushStyle, CategoryId } from '@/types';
 
 export default function ExportPage() {
@@ -23,6 +23,7 @@ export default function ExportPage() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
+  const [modalDataUrl, setModalDataUrl] = useState<string | null>(null);
 
   const template = templates.find((t) => t.id === templateId);
 
@@ -67,11 +68,15 @@ export default function ExportPage() {
 
       if (format === 'png') {
         blob = await exportAsPNG(artworkCanvas);
-        downloadBlob(blob, `书法作品_${timestamp}.png`);
       } else {
         blob = await exportAsJPG(artworkCanvas, 0.92);
-        downloadBlob(blob, `书法作品_${timestamp}.jpg`);
       }
+
+      await downloadWithFallback(
+        blob,
+        `书法作品_${timestamp}.${format}`,
+        (dataUrl) => setModalDataUrl(dataUrl)
+      );
 
       setExported(true);
       setTimeout(() => setExported(false), 3000);
@@ -223,6 +228,29 @@ export default function ExportPage() {
           </Link>
         </div>
       </div>
+
+      {/* 兜底弹窗：浏览器不支持直接下载时显示 */}
+      {modalDataUrl && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setModalDataUrl(null); }}
+        >
+          <p className="text-white text-sm mb-4 bg-white/20 px-4 py-2 rounded-full">
+            长按图片 → 保存到相册
+          </p>
+          <img
+            src={modalDataUrl}
+            alt="作品预览"
+            className="max-w-full max-h-[75vh] rounded-lg"
+          />
+          <button
+            onClick={() => setModalDataUrl(null)}
+            className="mt-4 text-white/60 text-sm hover:text-white transition-colors"
+          >
+            关闭
+          </button>
+        </div>
+      )}
     </main>
   );
 }
