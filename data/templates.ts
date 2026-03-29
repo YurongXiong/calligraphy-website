@@ -107,4 +107,34 @@ export const templates: Template[] = [
     borderStyle: 'solid',
     textColor: '#d4af37',
   },
+  // 单字模板 - 雾气窗户
+  {
+    id: 'single-fog',
+    name: '雾气窗户',
+    categoryId: 'single',
+    bgColor: '#1a1a1a',
+    bgImage: '/textures/fog window.jpg',
+    borderStyle: 'none',
+    textColor: 'rgba(255,255,255,0.7)',
+  },
+  // 挂画模板 - 雾气窗户
+  {
+    id: 'hanging-fog',
+    name: '雾气窗户',
+    categoryId: 'hanging',
+    bgColor: '#1a1a1a',
+    bgImage: '/textures/fog window.jpg',
+    borderStyle: 'none',
+    textColor: 'rgba(255,255,255,0.7)',
+  },
+  // 牌匾模板 - 雾气窗户
+  {
+    id: 'plaque-fog',
+    name: '雾气窗户',
+    categoryId: 'plaque',
+    bgColor: '#1a1a1a',
+    bgImage: '/textures/fog window.jpg',
+    borderStyle: 'none',
+    textColor: 'rgba(255,255,255,0.7)',
+  },
 ];

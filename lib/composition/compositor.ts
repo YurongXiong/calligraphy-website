@@ -242,6 +242,9 @@ async function drawBackground(ctx: CanvasRenderingContext2D, template: Template,
  * 绘制装裱边框
  */
 function drawBorder(ctx: CanvasRenderingContext2D, borderStyle: string, width: number, height: number): void {
+  // borderStyle === 'none' 时跳过边框绘制（如雾气窗户效果）
+  if (borderStyle === 'none') return;
+
   const borderWidth = 40;
 
   // 外边框 - 木框

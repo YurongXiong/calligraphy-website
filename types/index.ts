@@ -31,12 +31,12 @@ export interface CharacterStrokes {
 
 // 风格定义
 export interface BrushStyle {
-  id: 'natural' | 'heavy_ink' | 'flying_white';
+  id: 'natural' | 'heavy_ink' | 'flying_white' | 'fog';
   name: string;
   smoothing: number;
   widthRange: [number, number];
   opacity: number;
-  textureType: 'none' | 'heavy' | 'dry-brush';
+  textureType: 'none' | 'heavy' | 'dry-brush' | 'fog';
 }
 
 // 春联文本

@@ -157,6 +157,18 @@ export function renderStroke(
     ctx.shadowOffsetY = 3;
   }
 
+  if (style.textureType === 'fog') {
+    // 雾气效果：destination-out 擦除雾层，露出深色背景
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(255,255,255,1)';
+    const safeStroke = ensureMinOutlinePoints(stroke);
+    const d = quadraticBezierPath(safeStroke);
+    const path = new Path2D(d);
+    ctx.fill(path);
+    ctx.restore();
+    return;
+  }
+
   ctx.fillStyle = inkColor;
 
   // 轮廓点数不足 3 时，补充微偏移点防止退化三角形
