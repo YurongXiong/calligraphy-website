@@ -95,6 +95,4 @@ export interface ProjectStore {
   clearCurrentChar: () => void;
   setStyle: (id: BrushStyle['id']) => void;
   setTemplate: (id: string) => void;
-  saveDraft: () => void;
-  loadDraft: (projectId: string) => void;
 }

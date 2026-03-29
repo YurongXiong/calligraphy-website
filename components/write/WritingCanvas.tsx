@@ -21,7 +21,6 @@ export function WritingCanvas({ onComplete }: WritingCanvasProps) {
     currentCharIndex,
     styleId,
     updateCharacterStrokes,
-    saveDraft,
   } = useProjectStore();
 
   const currentChar = characters[currentCharIndex];
@@ -281,8 +280,6 @@ export function WritingCanvas({ onComplete }: WritingCanvasProps) {
           fgCtx.clearRect(0, 0, canvas.width, canvas.height);
         }
       }
-
-      saveDraft();
     };
 
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -296,7 +293,7 @@ export function WritingCanvas({ onComplete }: WritingCanvasProps) {
       canvas.removeEventListener('touchend', handleTouchEnd);
       canvas.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [currentChar, currentCharIndex, updateCharacterStrokes, saveDraft, styleId, style, scheduleRedraw]);
+  }, [currentChar, currentCharIndex, updateCharacterStrokes, styleId, style, scheduleRedraw]);
 
   return (
     <div ref={containerRef} className="flex flex-col items-center gap-4 w-full">

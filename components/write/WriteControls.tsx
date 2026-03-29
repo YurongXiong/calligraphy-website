@@ -10,7 +10,6 @@ export function WriteControls() {
     currentCharIndex,
     clearCurrentChar,
     setCurrentChar,
-    saveDraft,
   } = useProjectStore();
 
   const isLastChar = currentCharIndex === characters.length - 1;
@@ -33,7 +32,6 @@ export function WriteControls() {
   };
 
   const handleDone = () => {
-    saveDraft();
     router.push('/style');
   };
 

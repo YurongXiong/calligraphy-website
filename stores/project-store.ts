@@ -79,55 +79,6 @@ export const useProjectStore = create<ProjectStore>()(
       setTemplate: (id: string) => {
         set({ templateId: id });
       },
-
-      saveDraft: () => {
-        const state = get();
-        const draft = {
-          projectId: state.projectId,
-          categoryId: state.categoryId,
-          text: state.text,
-          characters: state.characters,
-          styleId: state.styleId,
-          templateId: state.templateId,
-          savedAt: Date.now(),
-        };
-
-        try {
-          const drafts = JSON.parse(localStorage.getItem('calligraphy-drafts') || '[]');
-          const existingIndex = drafts.findIndex((d: { projectId: string }) => d.projectId === state.projectId);
-
-          if (existingIndex >= 0) {
-            drafts[existingIndex] = draft;
-          } else {
-            drafts.unshift(draft);
-          }
-
-          localStorage.setItem('calligraphy-drafts', JSON.stringify(drafts.slice(0, 10)));
-        } catch {
-          // 忽略存储错误，避免影响正常功能
-        }
-      },
-
-      loadDraft: (projectId: string) => {
-        try {
-          const drafts = JSON.parse(localStorage.getItem('calligraphy-drafts') || '[]');
-          const draft = drafts.find((d: { projectId: string }) => d.projectId === projectId);
-
-          if (draft) {
-            set({
-              projectId: draft.projectId,
-              categoryId: draft.categoryId,
-              text: draft.text,
-              characters: draft.characters,
-              styleId: draft.styleId,
-              templateId: draft.templateId,
-              currentCharIndex: 0,
-            });
-          }
-        } catch {
-          // 忽略存储错误，避免影响正常功能
-        }
-      },
     }),
     {
       name: 'calligraphy-project',
