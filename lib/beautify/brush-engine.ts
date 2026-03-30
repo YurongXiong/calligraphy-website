@@ -136,7 +136,8 @@ export function renderStroke(
   points: Point[],
   _unusedSmoothedPath: unknown,
   style: BrushStyle,
-  inkColor: string = '#1a1a1a'
+  inkColor: string = '#1a1a1a',
+  borderStyle?: string
 ): void {
   if (points.length < 2) return;
 
@@ -157,8 +158,8 @@ export function renderStroke(
     ctx.shadowOffsetY = 3;
   }
 
-  if (style.textureType === 'fog') {
-    // 雾气效果：destination-out 擦除雾层，露出深色背景
+  if (borderStyle === 'none') {
+    // 雾气窗户效果（borderStyle='none'）：destination-out 擦除雾层，露出深色背景
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fillStyle = 'rgba(255,255,255,1)';
     const safeStroke = ensureMinOutlinePoints(stroke);
@@ -192,7 +193,8 @@ export function renderCharacter(
   offsetX: number = 0,
   offsetY: number = 0,
   scale: number = 1,
-  inkColor: string = '#1a1a1a'
+  inkColor: string = '#1a1a1a',
+  borderStyle?: string
 ): void {
   if (strokes.length === 0) return;
 
@@ -203,7 +205,7 @@ export function renderCharacter(
   for (const stroke of strokes) {
     const pts = stroke.points;
     if (!pts || pts.length < 2) continue;
-    renderStroke(ctx, pts, stroke.smoothedPath, style, inkColor);
+    renderStroke(ctx, pts, stroke.smoothedPath, style, inkColor, borderStyle);
   }
 
   ctx.restore();

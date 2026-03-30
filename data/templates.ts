@@ -110,7 +110,7 @@ export const templates: Template[] = [
   // 单字模板 - 雾气窗户
   {
     id: 'single-fog',
-    name: '雾气窗户',
+    name: '雾气窗户（适配飞白）',
     categoryId: 'single',
     bgColor: '#1a1a1a',
     bgImage: '/textures/fog window.jpg',
@@ -120,7 +120,7 @@ export const templates: Template[] = [
   // 挂画模板 - 雾气窗户
   {
     id: 'hanging-fog',
-    name: '雾气窗户',
+    name: '雾气窗户（适配飞白）',
     categoryId: 'hanging',
     bgColor: '#1a1a1a',
     bgImage: '/textures/fog window.jpg',
@@ -130,7 +130,7 @@ export const templates: Template[] = [
   // 牌匾模板 - 雾气窗户
   {
     id: 'plaque-fog',
-    name: '雾气窗户',
+    name: '雾气窗户（适配飞白）',
     categoryId: 'plaque',
     bgColor: '#1a1a1a',
     bgImage: '/textures/fog window.jpg',

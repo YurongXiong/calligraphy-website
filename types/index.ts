@@ -31,7 +31,7 @@ export interface CharacterStrokes {
 
 // 风格定义
 export interface BrushStyle {
-  id: 'natural' | 'heavy_ink' | 'flying_white' | 'fog';
+  id: 'natural' | 'heavy_ink' | 'flying_white';
   name: string;
   smoothing: number;
   widthRange: [number, number];

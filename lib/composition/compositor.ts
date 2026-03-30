@@ -78,7 +78,7 @@ export async function composeArtwork(
       const finalX = absX + offsetInCellX;
       const finalY = absY + offsetInCellY;
 
-      renderCharacter(ctx, char.strokes, style, finalX, finalY, scale, template.textColor);
+      renderCharacter(ctx, char.strokes, style, finalX, finalY, scale, template.textColor, template.borderStyle);
     }
 
     // 绘制水印
@@ -123,7 +123,7 @@ export async function composeArtwork(
     const finalX = absX + offsetInCellX;
     const finalY = absY + offsetInCellY;
 
-    renderCharacter(ctx, char.strokes, style, finalX, finalY, scale, template.textColor);
+    renderCharacter(ctx, char.strokes, style, finalX, finalY, scale, template.textColor, template.borderStyle);
   }
 
   // 绘制水印
