@@ -117,6 +117,16 @@ export const templates: Template[] = [
     borderStyle: 'none',
     textColor: 'rgba(255,255,255,0.7)',
   },
+  // 单字模板 - 水泥墙面
+  {
+    id: 'single-cement',
+    name: '水泥墙面',
+    categoryId: 'single',
+    bgColor: '#888888',
+    bgImage: '/textures/cement.png',
+    borderStyle: 'simple',
+    textColor: '#1a1a1a',
+  },
   // 挂画模板 - 雾气窗户
   {
     id: 'hanging-fog',
@@ -127,6 +137,16 @@ export const templates: Template[] = [
     borderStyle: 'none',
     textColor: 'rgba(255,255,255,0.7)',
   },
+  // 挂画模板 - 水泥墙面
+  {
+    id: 'hanging-cement',
+    name: '水泥墙面',
+    categoryId: 'hanging',
+    bgColor: '#888888',
+    bgImage: '/textures/cement.png',
+    borderStyle: 'simple',
+    textColor: '#1a1a1a',
+  },
   // 牌匾模板 - 雾气窗户
   {
     id: 'plaque-fog',
@@ -136,5 +156,15 @@ export const templates: Template[] = [
     bgImage: '/textures/fog window.jpg',
     borderStyle: 'none',
     textColor: 'rgba(255,255,255,0.7)',
+  },
+  // 牌匾模板 - 水泥墙面
+  {
+    id: 'plaque-cement',
+    name: '水泥墙面',
+    categoryId: 'plaque',
+    bgColor: '#888888',
+    bgImage: '/textures/cement.png',
+    borderStyle: 'solid',
+    textColor: '#1a1a1a',
   },
 ];
