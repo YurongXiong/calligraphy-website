@@ -167,4 +167,34 @@ export const templates: Template[] = [
     borderStyle: 'solid',
     textColor: '#1a1a1a',
   },
+  // 单字模板 - 大理石砖
+  {
+    id: 'single-marble',
+    name: '大理石砖',
+    categoryId: 'single',
+    bgColor: '#e8e8e8',
+    bgImage: '/textures/marble.png',
+    borderStyle: 'simple',
+    textColor: '#1a1a1a',
+  },
+  // 挂画模板 - 大理石砖
+  {
+    id: 'hanging-marble',
+    name: '大理石砖',
+    categoryId: 'hanging',
+    bgColor: '#e8e8e8',
+    bgImage: '/textures/marble.png',
+    borderStyle: 'simple',
+    textColor: '#1a1a1a',
+  },
+  // 牌匾模板 - 大理石砖
+  {
+    id: 'plaque-marble',
+    name: '大理石砖',
+    categoryId: 'plaque',
+    bgColor: '#e8e8e8',
+    bgImage: '/textures/marble.png',
+    borderStyle: 'solid',
+    textColor: '#1a1a1a',
+  },
 ];
