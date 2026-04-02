@@ -9,6 +9,100 @@ import { templates } from '@/data/templates';
 import { composePreview } from '@/lib/composition';
 import type { BrushStyle, CategoryId, Template } from '@/types';
 
+/** 渲染模板卡片预览图 */
+function TemplatePreview({ template }: { template: Template }) {
+  const id = template.id;
+
+  // 雾气窗户（适配飞白）
+  if (id === 'hanging-fog' || id === 'plaque-fog') {
+    return (
+      <svg viewBox="0 0 80 48" className="w-full h-full" style={{ display: 'block' }}>
+        {/* 木框 */}
+        <rect x="2" y="2" width="76" height="44" rx="3" fill="none" stroke="#8B5E3C" strokeWidth="4" />
+        {/* 灰蓝玻璃 */}
+        <rect x="6" y="6" width="68" height="36" rx="1" fill="#4a5d6a" />
+        {/* 田字格窗棂 */}
+        <line x1="40" y1="6" x2="40" y2="42" stroke="#8B5E3C" strokeWidth="2" />
+        <line x1="6" y1="24" x2="74" y2="24" stroke="#8B5E3C" strokeWidth="2" />
+        {/* 雾气效果 */}
+        <rect x="6" y="6" width="68" height="36" rx="1" fill="rgba(180,190,200,0.15)" />
+      </svg>
+    );
+  }
+
+  // 竖向卷轴
+  if (id === 'hanging-scroll-v') {
+    return (
+      <svg viewBox="0 0 40 64" className="w-full h-full" style={{ display: 'block' }}>
+        {/* 上卷轴头 */}
+        <rect x="4" y="2" width="32" height="8" rx="4" fill="#8B5E3C" />
+        <rect x="8" y="4" width="24" height="4" rx="2" fill="#A0714F" />
+        {/* 下卷轴头 */}
+        <rect x="4" y="54" width="32" height="8" rx="4" fill="#8B5E3C" />
+        <rect x="8" y="56" width="24" height="4" rx="2" fill="#A0714F" />
+        {/* 卷轴身 */}
+        <rect x="10" y="10" width="20" height="44" fill="#f5f0e8" />
+        <rect x="10" y="10" width="20" height="44" fill="rgba(0,0,0,0.05)" />
+        {/* 装饰线 */}
+        <line x1="12" y1="12" x2="12" y2="52" stroke="#d4c9b8" strokeWidth="0.5" />
+        <line x1="28" y1="12" x2="28" y2="52" stroke="#d4c9b8" strokeWidth="0.5" />
+      </svg>
+    );
+  }
+
+  // 横向卷轴
+  if (id === 'plaque-scroll') {
+    return (
+      <svg viewBox="0 0 80 28" className="w-full h-full" style={{ display: 'block' }}>
+        {/* 左卷轴头 */}
+        <rect x="2" y="4" width="8" height="20" rx="4" fill="#8B5E3C" />
+        <rect x="4" y="8" width="4" height="12" rx="2" fill="#A0714F" />
+        {/* 右卷轴头 */}
+        <rect x="70" y="4" width="8" height="20" rx="4" fill="#8B5E3C" />
+        <rect x="72" y="8" width="4" height="12" rx="2" fill="#A0714F" />
+        {/* 卷轴身 */}
+        <rect x="10" y="6" width="60" height="16" fill="#f5f0e8" />
+        <rect x="10" y="6" width="60" height="16" fill="rgba(0,0,0,0.05)" />
+        {/* 装饰线 */}
+        <line x1="12" y1="8" x2="68" y2="8" stroke="#d4c9b8" strokeWidth="0.5" />
+        <line x1="12" y1="20" x2="68" y2="20" stroke="#d4c9b8" strokeWidth="0.5" />
+      </svg>
+    );
+  }
+
+  // 蓝底金字：深蓝背景 + 金色样字（使用模板颜色）
+  if (id === 'hanging-blue-board') {
+    return (
+      <div
+        className="w-full h-full flex items-center justify-center"
+        style={{ backgroundColor: '#1a3a6b' }}
+      >
+        <span
+          className="text-lg font-bold"
+          style={{ color: template.textColor }}
+        >
+          样
+        </span>
+      </div>
+    );
+  }
+
+  // 默认：纯色 + 样字
+  return (
+    <div
+      className="w-full h-full flex items-center justify-center"
+      style={{ backgroundColor: template.bgColor }}
+    >
+      <span
+        className="text-lg font-bold"
+        style={{ color: template.textColor }}
+      >
+        样
+      </span>
+    </div>
+  );
+}
+
 export default function StylePage() {
   const router = useRouter();
   const characters = useProjectStore((state) => state.characters);
@@ -191,16 +285,8 @@ export default function StylePage() {
                       : 'border-paper-dark bg-paper hover:border-seal/50'
                   }`}
                 >
-                  <div
-                    className="h-20 rounded mb-2 flex items-center justify-center"
-                    style={{ backgroundColor: template.bgColor }}
-                  >
-                    <span
-                      className="text-lg font-bold"
-                      style={{ color: template.textColor }}
-                    >
-                      样
-                    </span>
+                  <div className="h-20 rounded mb-2 overflow-hidden">
+                    <TemplatePreview template={template} />
                   </div>
                   <span className="text-sm font-medium text-ink">{template.name}</span>
                 </button>
