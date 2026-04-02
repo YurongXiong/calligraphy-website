@@ -14,7 +14,7 @@ function TemplatePreview({ template }: { template: Template }) {
   const id = template.id;
 
   // 雾气窗户（适配飞白）
-  if (id === 'hanging-fog' || id === 'plaque-fog') {
+  if (id === 'hanging-fog' || id === 'plaque-fog' || id === 'single-fog') {
     return (
       <svg viewBox="0 0 80 48" className="w-full h-full" style={{ display: 'block' }}>
         {/* 木框 */}
