@@ -197,4 +197,14 @@ export const templates: Template[] = [
     borderStyle: 'solid',
     textColor: '#1a1a1a',
   },
+  // 牌匾模板 - 横向卷轴
+  {
+    id: 'plaque-scroll',
+    name: '横向卷轴',
+    categoryId: 'plaque',
+    bgColor: '#ffffff',
+    bgImage: '/textures/horizon scroll.png',
+    borderStyle: 'none',
+    textColor: '#1a1a1a',
+  },
 ];
