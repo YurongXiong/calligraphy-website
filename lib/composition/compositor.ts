@@ -219,26 +219,35 @@ function getContentArea(width: number, height: number): { x: number; y: number; 
  * 绘制背景
  */
 async function drawBackground(ctx: CanvasRenderingContext2D, template: Template, width: number, height: number): Promise<void> {
+  // 先填满背景色
+  ctx.fillStyle = template.bgColor;
+  ctx.fillRect(0, 0, width, height);
+
   if (template.bgImage) {
     const img = new Image();
     img.src = template.bgImage;
     await new Promise<void>((resolve) => {
       img.onload = () => {
-        const scaleX = template.bgScaleX ?? 1;
-        const drawWidth = width * scaleX;
-        const drawX = (width - drawWidth) / 2;
-        ctx.drawImage(img, drawX, 0, drawWidth, height);
+        if (template.bgContain) {
+          // 等比例缩放，图片完整放入画布，居中，四周留空
+          const scale = Math.min(width / img.width, height / img.height);
+          const drawWidth = img.width * scale;
+          const drawHeight = img.height * scale;
+          const drawX = (width - drawWidth) / 2;
+          const drawY = (height - drawHeight) / 2;
+          ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        } else {
+          const scaleX = template.bgScaleX ?? 1;
+          const drawWidth = width * scaleX;
+          const drawX = (width - drawWidth) / 2;
+          ctx.drawImage(img, drawX, 0, drawWidth, height);
+        }
         resolve();
       };
       img.onerror = () => {
-        ctx.fillStyle = template.bgColor;
-        ctx.fillRect(0, 0, width, height);
         resolve();
       };
     });
-  } else {
-    ctx.fillStyle = template.bgColor;
-    ctx.fillRect(0, 0, width, height);
   }
 }
 

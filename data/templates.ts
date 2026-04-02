@@ -222,4 +222,18 @@ export const templates: Template[] = [
     textOffsetX: -100,
     bgScaleX: 1.2,
   },
+  // 挂画模板 - 蓝底金字（仅限3字）
+  {
+    id: 'hanging-blue-board',
+    name: '蓝底金字（仅限3字）',
+    categoryId: 'hanging',
+    bgColor: '#000000',
+    bgImage: '/textures/vertical blue board.png',
+    borderStyle: 'none',
+    textColor: '#d4af37',
+    textScale: 1.1,
+    textSpacingScale: 0.7,
+    textOffsetY: 330,
+    bgScaleX: 1.2,
+  },
 ];

@@ -71,6 +71,7 @@ export interface Template {
   textOffsetY?: number;
   textOffsetX?: number;
   bgScaleX?: number;
+  bgContain?: boolean;
 }
 
 // 字位布局
