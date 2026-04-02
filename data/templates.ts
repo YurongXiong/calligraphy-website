@@ -207,4 +207,19 @@ export const templates: Template[] = [
     borderStyle: 'none',
     textColor: '#1a1a1a',
   },
+  // 挂画模板 - 竖向卷轴
+  {
+    id: 'hanging-scroll-v',
+    name: '竖向卷轴',
+    categoryId: 'hanging',
+    bgColor: '#ffffff',
+    bgImage: '/textures/vertical scroll.png',
+    borderStyle: 'none',
+    textColor: '#1a1a1a',
+    textScale: 1.2,
+    textSpacingScale: 0.75,
+    textOffsetY: 400,
+    textOffsetX: -100,
+    bgScaleX: 1.2,
+  },
 ];

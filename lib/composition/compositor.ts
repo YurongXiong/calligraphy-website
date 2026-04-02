@@ -77,8 +77,9 @@ export async function composeArtwork(
       const offsetInCellY = (pos.height - scaledStrokeHeight) / 2;
       const finalX = absX + offsetInCellX;
       const finalY = absY + offsetInCellY;
+      const finalScale = scale * (template.textScale ?? 1);
 
-      renderCharacter(ctx, char.strokes, style, finalX, finalY, scale, template.textColor);
+      renderCharacter(ctx, char.strokes, style, finalX, finalY, finalScale, template.textColor);
     }
 
     // 绘制水印
@@ -92,7 +93,8 @@ export async function composeArtwork(
     characters.length,
     contentArea.width,
     contentArea.height,
-    coupletInfo
+    coupletInfo,
+    template
   );
 
   // 按 positionType 渲染每个字
@@ -122,8 +124,9 @@ export async function composeArtwork(
 
     const finalX = absX + offsetInCellX;
     const finalY = absY + offsetInCellY;
+    const finalScale = scale * (template.textScale ?? 1);
 
-    renderCharacter(ctx, char.strokes, style, finalX, finalY, scale, template.textColor);
+    renderCharacter(ctx, char.strokes, style, finalX, finalY, finalScale, template.textColor);
   }
 
   // 绘制水印
@@ -221,9 +224,10 @@ async function drawBackground(ctx: CanvasRenderingContext2D, template: Template,
     img.src = template.bgImage;
     await new Promise<void>((resolve) => {
       img.onload = () => {
-        // 使用 3 参数 drawImage 进行 cover 缩放
-        // 这会自动缩放图片以覆盖整个画布
-        ctx.drawImage(img, 0, 0, width, height);
+        const scaleX = template.bgScaleX ?? 1;
+        const drawWidth = width * scaleX;
+        const drawX = (width - drawWidth) / 2;
+        ctx.drawImage(img, drawX, 0, drawWidth, height);
         resolve();
       };
       img.onerror = () => {

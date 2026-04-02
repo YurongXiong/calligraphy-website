@@ -1,4 +1,4 @@
-import type { CategoryId, CharPosition } from '../../types';
+import type { CategoryId, CharPosition, Template } from '../../types';
 
 export interface Rect {
   x: number;
@@ -16,7 +16,8 @@ export function calculateLayout(
   charCount: number,
   contentWidth: number,
   contentHeight: number,
-  coupletInfo?: { upperCount: number; lowerCount: number; bannerCount: number }
+  coupletInfo?: { upperCount: number; lowerCount: number; bannerCount: number },
+  template?: Template
 ): CharPosition[] {
   switch (categoryId) {
     case 'couplet':
@@ -24,13 +25,13 @@ export function calculateLayout(
       // 此处返回空数组，实际上春联分支不会走到这里
       return [];
     case 'hanging':
-      return calculateHangingLayout(charCount, contentWidth, contentHeight);
+      return calculateHangingLayout(charCount, contentWidth, contentHeight, template);
     case 'plaque':
       return calculatePlaqueLayout(charCount, contentWidth, contentHeight);
     case 'single':
       return calculateSingleLayout(charCount, contentWidth, contentHeight);
     default:
-      return calculateHangingLayout(charCount, contentWidth, contentHeight);
+      return calculateHangingLayout(charCount, contentWidth, contentHeight, template);
   }
 }
 
@@ -122,7 +123,8 @@ export function calculateCoupletLayoutWithFrames(
 function calculateHangingLayout(
   charCount: number,
   contentWidth: number,
-  contentHeight: number
+  contentHeight: number,
+  template?: Template
 ): CharPosition[] {
   const positions: CharPosition[] = [];
   const marginY = 150;
@@ -131,15 +133,19 @@ function calculateHangingLayout(
   const usableWidth = contentWidth - marginX * 2;
 
   // 字竖排，每字宽 = 高（正方形格）
-  const charSize = Math.min(usableWidth, usableHeight / charCount);
+  // textSpacingScale 缩小字间距（用于卷轴等特殊模板）
+  const spacingScale = template?.textSpacingScale ?? 1;
+  const offsetX = template?.textOffsetX ?? 0;
+  const offsetY = template?.textOffsetY ?? 0;
+  const charSize = Math.min(usableWidth, (usableHeight / charCount) * spacingScale);
 
   // 水平居中
-  const startX = marginX + (usableWidth - charSize) / 2;
+  const startX = marginX + (usableWidth - charSize) / 2 + offsetX;
 
   for (let i = 0; i < charCount; i++) {
     positions.push({
       x: startX,
-      y: marginY + i * charSize,
+      y: marginY + i * charSize + offsetY,
       width: charSize,
       height: charSize,
       rotation: 0,

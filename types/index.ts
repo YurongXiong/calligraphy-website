@@ -66,6 +66,11 @@ export interface Template {
   bgImage?: string;
   borderStyle: string;
   textColor: string;
+  textScale?: number;
+  textSpacingScale?: number;
+  textOffsetY?: number;
+  textOffsetX?: number;
+  bgScaleX?: number;
 }
 
 // 字位布局
